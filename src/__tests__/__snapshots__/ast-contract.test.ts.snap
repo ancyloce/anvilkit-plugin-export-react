@@ -1,0 +1,2137 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AST contract — every demo fixture parses cleanly > parses the emitted source for bento-grid (tsx) 1`] = `
+{
+  "body": [
+    {
+      "attributes": [],
+      "importKind": "value",
+      "source": {
+        "type": "Literal",
+        "value": "@anvilkit/bento-grid",
+      },
+      "specifiers": [
+        {
+          "importKind": "value",
+          "imported": {
+            "decorators": [],
+            "name": "BentoGrid",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "local": {
+            "decorators": [],
+            "name": "BentoGrid",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "type": "ImportSpecifier",
+        },
+      ],
+      "type": "ImportDeclaration",
+    },
+    {
+      "declaration": {
+        "async": false,
+        "body": {
+          "body": [
+            {
+              "argument": {
+                "children": [],
+                "closingElement": null,
+                "openingElement": {
+                  "attributes": [
+                    {
+                      "name": {
+                        "name": "theme",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "light",
+                      },
+                    },
+                    {
+                      "name": {
+                        "name": "platform",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "web",
+                      },
+                    },
+                    {
+                      "name": {
+                        "name": "items",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "expression": {
+                          "elements": [
+                            {
+                              "properties": [
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "title",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "Snapshots",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "description",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "Lock output to a stable TSX baseline.",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "icon",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "S",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "size",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "wide",
+                                  },
+                                },
+                              ],
+                              "type": "ObjectExpression",
+                            },
+                            {
+                              "properties": [
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "title",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "Linting",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "description",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "Keep fixture modules clean and deterministic.",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "icon",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "L",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "size",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "default",
+                                  },
+                                },
+                              ],
+                              "type": "ObjectExpression",
+                            },
+                          ],
+                          "type": "ArrayExpression",
+                        },
+                        "type": "JSXExpressionContainer",
+                      },
+                    },
+                  ],
+                  "name": {
+                    "name": "BentoGrid",
+                    "type": "JSXIdentifier",
+                  },
+                  "selfClosing": true,
+                  "type": "JSXOpeningElement",
+                  "typeArguments": undefined,
+                },
+                "type": "JSXElement",
+              },
+              "type": "ReturnStatement",
+            },
+          ],
+          "type": "BlockStatement",
+        },
+        "declare": false,
+        "expression": false,
+        "generator": false,
+        "id": {
+          "decorators": [],
+          "name": "Page",
+          "optional": false,
+          "type": "Identifier",
+          "typeAnnotation": undefined,
+        },
+        "params": [],
+        "returnType": {
+          "type": "TSTypeAnnotation",
+          "typeAnnotation": {
+            "type": "TSTypeReference",
+            "typeArguments": undefined,
+            "typeName": {
+              "left": {
+                "decorators": [],
+                "name": "JSX",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "right": {
+                "decorators": [],
+                "name": "Element",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "type": "TSQualifiedName",
+            },
+          },
+        },
+        "type": "FunctionDeclaration",
+        "typeParameters": undefined,
+      },
+      "exportKind": "value",
+      "type": "ExportDefaultDeclaration",
+    },
+  ],
+  "sourceType": "module",
+  "type": "Program",
+}
+`;
+
+exports[`AST contract — every demo fixture parses cleanly > parses the emitted source for blog-list (tsx) 1`] = `
+{
+  "body": [
+    {
+      "attributes": [],
+      "importKind": "value",
+      "source": {
+        "type": "Literal",
+        "value": "@anvilkit/blog-list",
+      },
+      "specifiers": [
+        {
+          "importKind": "value",
+          "imported": {
+            "decorators": [],
+            "name": "BlogList",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "local": {
+            "decorators": [],
+            "name": "BlogList",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "type": "ImportSpecifier",
+        },
+      ],
+      "type": "ImportDeclaration",
+    },
+    {
+      "declaration": {
+        "async": false,
+        "body": {
+          "body": [
+            {
+              "argument": {
+                "children": [],
+                "closingElement": null,
+                "openingElement": {
+                  "attributes": [
+                    {
+                      "name": {
+                        "name": "posts",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "expression": {
+                          "elements": [
+                            {
+                              "properties": [
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "title",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "Ship log",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "slug",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "/blog/ship-log",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "readingTimeMinutes",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": 4,
+                                  },
+                                },
+                              ],
+                              "type": "ObjectExpression",
+                            },
+                            {
+                              "properties": [
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "title",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "Architecture diary",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "slug",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "/blog/architecture-diary",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "readingTimeMinutes",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": 7,
+                                  },
+                                },
+                              ],
+                              "type": "ObjectExpression",
+                            },
+                          ],
+                          "type": "ArrayExpression",
+                        },
+                        "type": "JSXExpressionContainer",
+                      },
+                    },
+                  ],
+                  "name": {
+                    "name": "BlogList",
+                    "type": "JSXIdentifier",
+                  },
+                  "selfClosing": true,
+                  "type": "JSXOpeningElement",
+                  "typeArguments": undefined,
+                },
+                "type": "JSXElement",
+              },
+              "type": "ReturnStatement",
+            },
+          ],
+          "type": "BlockStatement",
+        },
+        "declare": false,
+        "expression": false,
+        "generator": false,
+        "id": {
+          "decorators": [],
+          "name": "Page",
+          "optional": false,
+          "type": "Identifier",
+          "typeAnnotation": undefined,
+        },
+        "params": [],
+        "returnType": {
+          "type": "TSTypeAnnotation",
+          "typeAnnotation": {
+            "type": "TSTypeReference",
+            "typeArguments": undefined,
+            "typeName": {
+              "left": {
+                "decorators": [],
+                "name": "JSX",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "right": {
+                "decorators": [],
+                "name": "Element",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "type": "TSQualifiedName",
+            },
+          },
+        },
+        "type": "FunctionDeclaration",
+        "typeParameters": undefined,
+      },
+      "exportKind": "value",
+      "type": "ExportDefaultDeclaration",
+    },
+  ],
+  "sourceType": "module",
+  "type": "Program",
+}
+`;
+
+exports[`AST contract — every demo fixture parses cleanly > parses the emitted source for button (tsx) 1`] = `
+{
+  "body": [
+    {
+      "attributes": [],
+      "importKind": "value",
+      "source": {
+        "type": "Literal",
+        "value": "@anvilkit/button",
+      },
+      "specifiers": [
+        {
+          "importKind": "value",
+          "imported": {
+            "decorators": [],
+            "name": "Button",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "local": {
+            "decorators": [],
+            "name": "Button",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "type": "ImportSpecifier",
+        },
+      ],
+      "type": "ImportDeclaration",
+    },
+    {
+      "declaration": {
+        "async": false,
+        "body": {
+          "body": [
+            {
+              "argument": {
+                "children": [],
+                "closingElement": null,
+                "openingElement": {
+                  "attributes": [
+                    {
+                      "name": {
+                        "name": "label",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "Get started",
+                      },
+                    },
+                    {
+                      "name": {
+                        "name": "href",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "/signup",
+                      },
+                    },
+                    {
+                      "name": {
+                        "name": "variant",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "primary",
+                      },
+                    },
+                  ],
+                  "name": {
+                    "name": "Button",
+                    "type": "JSXIdentifier",
+                  },
+                  "selfClosing": true,
+                  "type": "JSXOpeningElement",
+                  "typeArguments": undefined,
+                },
+                "type": "JSXElement",
+              },
+              "type": "ReturnStatement",
+            },
+          ],
+          "type": "BlockStatement",
+        },
+        "declare": false,
+        "expression": false,
+        "generator": false,
+        "id": {
+          "decorators": [],
+          "name": "Page",
+          "optional": false,
+          "type": "Identifier",
+          "typeAnnotation": undefined,
+        },
+        "params": [],
+        "returnType": {
+          "type": "TSTypeAnnotation",
+          "typeAnnotation": {
+            "type": "TSTypeReference",
+            "typeArguments": undefined,
+            "typeName": {
+              "left": {
+                "decorators": [],
+                "name": "JSX",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "right": {
+                "decorators": [],
+                "name": "Element",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "type": "TSQualifiedName",
+            },
+          },
+        },
+        "type": "FunctionDeclaration",
+        "typeParameters": undefined,
+      },
+      "exportKind": "value",
+      "type": "ExportDefaultDeclaration",
+    },
+  ],
+  "sourceType": "module",
+  "type": "Program",
+}
+`;
+
+exports[`AST contract — every demo fixture parses cleanly > parses the emitted source for helps (tsx) 1`] = `
+{
+  "body": [
+    {
+      "attributes": [],
+      "importKind": "value",
+      "source": {
+        "type": "Literal",
+        "value": "@anvilkit/helps",
+      },
+      "specifiers": [
+        {
+          "importKind": "value",
+          "imported": {
+            "decorators": [],
+            "name": "Helps",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "local": {
+            "decorators": [],
+            "name": "Helps",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "type": "ImportSpecifier",
+        },
+      ],
+      "type": "ImportDeclaration",
+    },
+    {
+      "declaration": {
+        "async": false,
+        "body": {
+          "body": [
+            {
+              "argument": {
+                "children": [],
+                "closingElement": null,
+                "openingElement": {
+                  "attributes": [
+                    {
+                      "name": {
+                        "name": "heading",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "Frequently asked",
+                      },
+                    },
+                    {
+                      "name": {
+                        "name": "items",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "expression": {
+                          "elements": [
+                            {
+                              "properties": [
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "q",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "How do I install?",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "a",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "Run pnpm add @anvilkit/core.",
+                                  },
+                                },
+                              ],
+                              "type": "ObjectExpression",
+                            },
+                            {
+                              "properties": [
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "q",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "Does it support React 19?",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "a",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "Yes, via the peer range.",
+                                  },
+                                },
+                              ],
+                              "type": "ObjectExpression",
+                            },
+                          ],
+                          "type": "ArrayExpression",
+                        },
+                        "type": "JSXExpressionContainer",
+                      },
+                    },
+                  ],
+                  "name": {
+                    "name": "Helps",
+                    "type": "JSXIdentifier",
+                  },
+                  "selfClosing": true,
+                  "type": "JSXOpeningElement",
+                  "typeArguments": undefined,
+                },
+                "type": "JSXElement",
+              },
+              "type": "ReturnStatement",
+            },
+          ],
+          "type": "BlockStatement",
+        },
+        "declare": false,
+        "expression": false,
+        "generator": false,
+        "id": {
+          "decorators": [],
+          "name": "Page",
+          "optional": false,
+          "type": "Identifier",
+          "typeAnnotation": undefined,
+        },
+        "params": [],
+        "returnType": {
+          "type": "TSTypeAnnotation",
+          "typeAnnotation": {
+            "type": "TSTypeReference",
+            "typeArguments": undefined,
+            "typeName": {
+              "left": {
+                "decorators": [],
+                "name": "JSX",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "right": {
+                "decorators": [],
+                "name": "Element",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "type": "TSQualifiedName",
+            },
+          },
+        },
+        "type": "FunctionDeclaration",
+        "typeParameters": undefined,
+      },
+      "exportKind": "value",
+      "type": "ExportDefaultDeclaration",
+    },
+  ],
+  "sourceType": "module",
+  "type": "Program",
+}
+`;
+
+exports[`AST contract — every demo fixture parses cleanly > parses the emitted source for hero (tsx) 1`] = `
+{
+  "body": [
+    {
+      "attributes": [],
+      "importKind": "value",
+      "source": {
+        "type": "Literal",
+        "value": "@anvilkit/hero",
+      },
+      "specifiers": [
+        {
+          "importKind": "value",
+          "imported": {
+            "decorators": [],
+            "name": "Hero",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "local": {
+            "decorators": [],
+            "name": "Hero",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "type": "ImportSpecifier",
+        },
+      ],
+      "type": "ImportDeclaration",
+    },
+    {
+      "declaration": {
+        "async": false,
+        "body": {
+          "body": [
+            {
+              "argument": {
+                "children": [],
+                "closingElement": null,
+                "openingElement": {
+                  "attributes": [
+                    {
+                      "name": {
+                        "name": "headline",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "Ship updates without friction.",
+                      },
+                    },
+                    {
+                      "name": {
+                        "name": "description",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "Deterministic React exports for marketing pages.",
+                      },
+                    },
+                    {
+                      "name": {
+                        "name": "linuxLabel",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "Download for Linux",
+                      },
+                    },
+                    {
+                      "name": {
+                        "name": "linuxHref",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "https://example.com/linux",
+                      },
+                    },
+                  ],
+                  "name": {
+                    "name": "Hero",
+                    "type": "JSXIdentifier",
+                  },
+                  "selfClosing": true,
+                  "type": "JSXOpeningElement",
+                  "typeArguments": undefined,
+                },
+                "type": "JSXElement",
+              },
+              "type": "ReturnStatement",
+            },
+          ],
+          "type": "BlockStatement",
+        },
+        "declare": false,
+        "expression": false,
+        "generator": false,
+        "id": {
+          "decorators": [],
+          "name": "Page",
+          "optional": false,
+          "type": "Identifier",
+          "typeAnnotation": undefined,
+        },
+        "params": [],
+        "returnType": {
+          "type": "TSTypeAnnotation",
+          "typeAnnotation": {
+            "type": "TSTypeReference",
+            "typeArguments": undefined,
+            "typeName": {
+              "left": {
+                "decorators": [],
+                "name": "JSX",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "right": {
+                "decorators": [],
+                "name": "Element",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "type": "TSQualifiedName",
+            },
+          },
+        },
+        "type": "FunctionDeclaration",
+        "typeParameters": undefined,
+      },
+      "exportKind": "value",
+      "type": "ExportDefaultDeclaration",
+    },
+  ],
+  "sourceType": "module",
+  "type": "Program",
+}
+`;
+
+exports[`AST contract — every demo fixture parses cleanly > parses the emitted source for input (tsx) 1`] = `
+{
+  "body": [
+    {
+      "attributes": [],
+      "importKind": "value",
+      "source": {
+        "type": "Literal",
+        "value": "@anvilkit/input",
+      },
+      "specifiers": [
+        {
+          "importKind": "value",
+          "imported": {
+            "decorators": [],
+            "name": "Input",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "local": {
+            "decorators": [],
+            "name": "Input",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "type": "ImportSpecifier",
+        },
+      ],
+      "type": "ImportDeclaration",
+    },
+    {
+      "declaration": {
+        "async": false,
+        "body": {
+          "body": [
+            {
+              "argument": {
+                "children": [],
+                "closingElement": null,
+                "openingElement": {
+                  "attributes": [
+                    {
+                      "name": {
+                        "name": "name",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "email",
+                      },
+                    },
+                    {
+                      "name": {
+                        "name": "placeholder",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "you@example.com",
+                      },
+                    },
+                    {
+                      "name": {
+                        "name": "required",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "expression": {
+                          "type": "Literal",
+                          "value": true,
+                        },
+                        "type": "JSXExpressionContainer",
+                      },
+                    },
+                  ],
+                  "name": {
+                    "name": "Input",
+                    "type": "JSXIdentifier",
+                  },
+                  "selfClosing": true,
+                  "type": "JSXOpeningElement",
+                  "typeArguments": undefined,
+                },
+                "type": "JSXElement",
+              },
+              "type": "ReturnStatement",
+            },
+          ],
+          "type": "BlockStatement",
+        },
+        "declare": false,
+        "expression": false,
+        "generator": false,
+        "id": {
+          "decorators": [],
+          "name": "Page",
+          "optional": false,
+          "type": "Identifier",
+          "typeAnnotation": undefined,
+        },
+        "params": [],
+        "returnType": {
+          "type": "TSTypeAnnotation",
+          "typeAnnotation": {
+            "type": "TSTypeReference",
+            "typeArguments": undefined,
+            "typeName": {
+              "left": {
+                "decorators": [],
+                "name": "JSX",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "right": {
+                "decorators": [],
+                "name": "Element",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "type": "TSQualifiedName",
+            },
+          },
+        },
+        "type": "FunctionDeclaration",
+        "typeParameters": undefined,
+      },
+      "exportKind": "value",
+      "type": "ExportDefaultDeclaration",
+    },
+  ],
+  "sourceType": "module",
+  "type": "Program",
+}
+`;
+
+exports[`AST contract — every demo fixture parses cleanly > parses the emitted source for logo-clouds (tsx) 1`] = `
+{
+  "body": [
+    {
+      "attributes": [],
+      "importKind": "value",
+      "source": {
+        "type": "Literal",
+        "value": "@anvilkit/logo-clouds",
+      },
+      "specifiers": [
+        {
+          "importKind": "value",
+          "imported": {
+            "decorators": [],
+            "name": "LogoClouds",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "local": {
+            "decorators": [],
+            "name": "LogoClouds",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "type": "ImportSpecifier",
+        },
+      ],
+      "type": "ImportDeclaration",
+    },
+    {
+      "declaration": {
+        "async": false,
+        "body": {
+          "body": [
+            {
+              "argument": {
+                "children": [],
+                "closingElement": null,
+                "openingElement": {
+                  "attributes": [
+                    {
+                      "name": {
+                        "name": "title",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "Trusted by teams everywhere",
+                      },
+                    },
+                    {
+                      "name": {
+                        "name": "items",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "expression": {
+                          "elements": [
+                            {
+                              "properties": [
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "label",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "React",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "src",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "/assets/logos/react.svg",
+                                  },
+                                },
+                              ],
+                              "type": "ObjectExpression",
+                            },
+                            {
+                              "properties": [
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "label",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "Docker",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "src",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "/assets/logos/docker.svg",
+                                  },
+                                },
+                              ],
+                              "type": "ObjectExpression",
+                            },
+                          ],
+                          "type": "ArrayExpression",
+                        },
+                        "type": "JSXExpressionContainer",
+                      },
+                    },
+                  ],
+                  "name": {
+                    "name": "LogoClouds",
+                    "type": "JSXIdentifier",
+                  },
+                  "selfClosing": true,
+                  "type": "JSXOpeningElement",
+                  "typeArguments": undefined,
+                },
+                "type": "JSXElement",
+              },
+              "type": "ReturnStatement",
+            },
+          ],
+          "type": "BlockStatement",
+        },
+        "declare": false,
+        "expression": false,
+        "generator": false,
+        "id": {
+          "decorators": [],
+          "name": "Page",
+          "optional": false,
+          "type": "Identifier",
+          "typeAnnotation": undefined,
+        },
+        "params": [],
+        "returnType": {
+          "type": "TSTypeAnnotation",
+          "typeAnnotation": {
+            "type": "TSTypeReference",
+            "typeArguments": undefined,
+            "typeName": {
+              "left": {
+                "decorators": [],
+                "name": "JSX",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "right": {
+                "decorators": [],
+                "name": "Element",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "type": "TSQualifiedName",
+            },
+          },
+        },
+        "type": "FunctionDeclaration",
+        "typeParameters": undefined,
+      },
+      "exportKind": "value",
+      "type": "ExportDefaultDeclaration",
+    },
+  ],
+  "sourceType": "module",
+  "type": "Program",
+}
+`;
+
+exports[`AST contract — every demo fixture parses cleanly > parses the emitted source for navbar (tsx) 1`] = `
+{
+  "body": [
+    {
+      "attributes": [],
+      "importKind": "value",
+      "source": {
+        "type": "Literal",
+        "value": "@anvilkit/navbar",
+      },
+      "specifiers": [
+        {
+          "importKind": "value",
+          "imported": {
+            "decorators": [],
+            "name": "Navbar",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "local": {
+            "decorators": [],
+            "name": "Navbar",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "type": "ImportSpecifier",
+        },
+      ],
+      "type": "ImportDeclaration",
+    },
+    {
+      "declaration": {
+        "async": false,
+        "body": {
+          "body": [
+            {
+              "argument": {
+                "children": [],
+                "closingElement": null,
+                "openingElement": {
+                  "attributes": [
+                    {
+                      "name": {
+                        "name": "brand",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "Anvilkit",
+                      },
+                    },
+                    {
+                      "name": {
+                        "name": "links",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "expression": {
+                          "elements": [
+                            {
+                              "properties": [
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "label",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "Docs",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "href",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "/docs",
+                                  },
+                                },
+                              ],
+                              "type": "ObjectExpression",
+                            },
+                            {
+                              "properties": [
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "label",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "Pricing",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "href",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "/pricing",
+                                  },
+                                },
+                              ],
+                              "type": "ObjectExpression",
+                            },
+                          ],
+                          "type": "ArrayExpression",
+                        },
+                        "type": "JSXExpressionContainer",
+                      },
+                    },
+                  ],
+                  "name": {
+                    "name": "Navbar",
+                    "type": "JSXIdentifier",
+                  },
+                  "selfClosing": true,
+                  "type": "JSXOpeningElement",
+                  "typeArguments": undefined,
+                },
+                "type": "JSXElement",
+              },
+              "type": "ReturnStatement",
+            },
+          ],
+          "type": "BlockStatement",
+        },
+        "declare": false,
+        "expression": false,
+        "generator": false,
+        "id": {
+          "decorators": [],
+          "name": "Page",
+          "optional": false,
+          "type": "Identifier",
+          "typeAnnotation": undefined,
+        },
+        "params": [],
+        "returnType": {
+          "type": "TSTypeAnnotation",
+          "typeAnnotation": {
+            "type": "TSTypeReference",
+            "typeArguments": undefined,
+            "typeName": {
+              "left": {
+                "decorators": [],
+                "name": "JSX",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "right": {
+                "decorators": [],
+                "name": "Element",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "type": "TSQualifiedName",
+            },
+          },
+        },
+        "type": "FunctionDeclaration",
+        "typeParameters": undefined,
+      },
+      "exportKind": "value",
+      "type": "ExportDefaultDeclaration",
+    },
+  ],
+  "sourceType": "module",
+  "type": "Program",
+}
+`;
+
+exports[`AST contract — every demo fixture parses cleanly > parses the emitted source for pricing-minimal (tsx) 1`] = `
+{
+  "body": [
+    {
+      "attributes": [],
+      "importKind": "value",
+      "source": {
+        "type": "Literal",
+        "value": "@anvilkit/pricing-minimal",
+      },
+      "specifiers": [
+        {
+          "importKind": "value",
+          "imported": {
+            "decorators": [],
+            "name": "PricingMinimal",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "local": {
+            "decorators": [],
+            "name": "PricingMinimal",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "type": "ImportSpecifier",
+        },
+      ],
+      "type": "ImportDeclaration",
+    },
+    {
+      "declaration": {
+        "async": false,
+        "body": {
+          "body": [
+            {
+              "argument": {
+                "children": [],
+                "closingElement": null,
+                "openingElement": {
+                  "attributes": [
+                    {
+                      "name": {
+                        "name": "headline",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "Simple, transparent pricing",
+                      },
+                    },
+                    {
+                      "name": {
+                        "name": "tiers",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "expression": {
+                          "elements": [
+                            {
+                              "properties": [
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "name",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "Starter",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "price",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": 0,
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "features",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "elements": [
+                                      {
+                                        "type": "Literal",
+                                        "value": "5 pages",
+                                      },
+                                      {
+                                        "type": "Literal",
+                                        "value": "Community",
+                                      },
+                                    ],
+                                    "type": "ArrayExpression",
+                                  },
+                                },
+                              ],
+                              "type": "ObjectExpression",
+                            },
+                            {
+                              "properties": [
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "name",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "Pro",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "price",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": 29,
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "features",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "elements": [
+                                      {
+                                        "type": "Literal",
+                                        "value": "Unlimited",
+                                      },
+                                      {
+                                        "type": "Literal",
+                                        "value": "Priority",
+                                      },
+                                    ],
+                                    "type": "ArrayExpression",
+                                  },
+                                },
+                              ],
+                              "type": "ObjectExpression",
+                            },
+                          ],
+                          "type": "ArrayExpression",
+                        },
+                        "type": "JSXExpressionContainer",
+                      },
+                    },
+                  ],
+                  "name": {
+                    "name": "PricingMinimal",
+                    "type": "JSXIdentifier",
+                  },
+                  "selfClosing": true,
+                  "type": "JSXOpeningElement",
+                  "typeArguments": undefined,
+                },
+                "type": "JSXElement",
+              },
+              "type": "ReturnStatement",
+            },
+          ],
+          "type": "BlockStatement",
+        },
+        "declare": false,
+        "expression": false,
+        "generator": false,
+        "id": {
+          "decorators": [],
+          "name": "Page",
+          "optional": false,
+          "type": "Identifier",
+          "typeAnnotation": undefined,
+        },
+        "params": [],
+        "returnType": {
+          "type": "TSTypeAnnotation",
+          "typeAnnotation": {
+            "type": "TSTypeReference",
+            "typeArguments": undefined,
+            "typeName": {
+              "left": {
+                "decorators": [],
+                "name": "JSX",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "right": {
+                "decorators": [],
+                "name": "Element",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "type": "TSQualifiedName",
+            },
+          },
+        },
+        "type": "FunctionDeclaration",
+        "typeParameters": undefined,
+      },
+      "exportKind": "value",
+      "type": "ExportDefaultDeclaration",
+    },
+  ],
+  "sourceType": "module",
+  "type": "Program",
+}
+`;
+
+exports[`AST contract — every demo fixture parses cleanly > parses the emitted source for section (tsx) 1`] = `
+{
+  "body": [
+    {
+      "attributes": [],
+      "importKind": "value",
+      "source": {
+        "type": "Literal",
+        "value": "@anvilkit/section",
+      },
+      "specifiers": [
+        {
+          "importKind": "value",
+          "imported": {
+            "decorators": [],
+            "name": "Section",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "local": {
+            "decorators": [],
+            "name": "Section",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "type": "ImportSpecifier",
+        },
+      ],
+      "type": "ImportDeclaration",
+    },
+    {
+      "declaration": {
+        "async": false,
+        "body": {
+          "body": [
+            {
+              "argument": {
+                "children": [],
+                "closingElement": null,
+                "openingElement": {
+                  "attributes": [
+                    {
+                      "name": {
+                        "name": "title",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "Everything you need",
+                      },
+                    },
+                    {
+                      "name": {
+                        "name": "body",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "type": "Literal",
+                        "value": "A feature overview in plain prose.",
+                      },
+                    },
+                  ],
+                  "name": {
+                    "name": "Section",
+                    "type": "JSXIdentifier",
+                  },
+                  "selfClosing": true,
+                  "type": "JSXOpeningElement",
+                  "typeArguments": undefined,
+                },
+                "type": "JSXElement",
+              },
+              "type": "ReturnStatement",
+            },
+          ],
+          "type": "BlockStatement",
+        },
+        "declare": false,
+        "expression": false,
+        "generator": false,
+        "id": {
+          "decorators": [],
+          "name": "Page",
+          "optional": false,
+          "type": "Identifier",
+          "typeAnnotation": undefined,
+        },
+        "params": [],
+        "returnType": {
+          "type": "TSTypeAnnotation",
+          "typeAnnotation": {
+            "type": "TSTypeReference",
+            "typeArguments": undefined,
+            "typeName": {
+              "left": {
+                "decorators": [],
+                "name": "JSX",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "right": {
+                "decorators": [],
+                "name": "Element",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "type": "TSQualifiedName",
+            },
+          },
+        },
+        "type": "FunctionDeclaration",
+        "typeParameters": undefined,
+      },
+      "exportKind": "value",
+      "type": "ExportDefaultDeclaration",
+    },
+  ],
+  "sourceType": "module",
+  "type": "Program",
+}
+`;
+
+exports[`AST contract — every demo fixture parses cleanly > parses the emitted source for statistics (tsx) 1`] = `
+{
+  "body": [
+    {
+      "attributes": [],
+      "importKind": "value",
+      "source": {
+        "type": "Literal",
+        "value": "@anvilkit/statistics",
+      },
+      "specifiers": [
+        {
+          "importKind": "value",
+          "imported": {
+            "decorators": [],
+            "name": "Statistics",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "local": {
+            "decorators": [],
+            "name": "Statistics",
+            "optional": false,
+            "type": "Identifier",
+            "typeAnnotation": undefined,
+          },
+          "type": "ImportSpecifier",
+        },
+      ],
+      "type": "ImportDeclaration",
+    },
+    {
+      "declaration": {
+        "async": false,
+        "body": {
+          "body": [
+            {
+              "argument": {
+                "children": [],
+                "closingElement": null,
+                "openingElement": {
+                  "attributes": [
+                    {
+                      "name": {
+                        "name": "items",
+                        "type": "JSXIdentifier",
+                      },
+                      "type": "JSXAttribute",
+                      "value": {
+                        "expression": {
+                          "elements": [
+                            {
+                              "properties": [
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "value",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "99.99%",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "label",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "Uptime",
+                                  },
+                                },
+                              ],
+                              "type": "ObjectExpression",
+                            },
+                            {
+                              "properties": [
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "value",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "20ms",
+                                  },
+                                },
+                                {
+                                  "computed": false,
+                                  "key": {
+                                    "type": "Literal",
+                                    "value": "label",
+                                  },
+                                  "kind": "init",
+                                  "method": false,
+                                  "optional": false,
+                                  "shorthand": false,
+                                  "type": "Property",
+                                  "value": {
+                                    "type": "Literal",
+                                    "value": "p95 latency",
+                                  },
+                                },
+                              ],
+                              "type": "ObjectExpression",
+                            },
+                          ],
+                          "type": "ArrayExpression",
+                        },
+                        "type": "JSXExpressionContainer",
+                      },
+                    },
+                  ],
+                  "name": {
+                    "name": "Statistics",
+                    "type": "JSXIdentifier",
+                  },
+                  "selfClosing": true,
+                  "type": "JSXOpeningElement",
+                  "typeArguments": undefined,
+                },
+                "type": "JSXElement",
+              },
+              "type": "ReturnStatement",
+            },
+          ],
+          "type": "BlockStatement",
+        },
+        "declare": false,
+        "expression": false,
+        "generator": false,
+        "id": {
+          "decorators": [],
+          "name": "Page",
+          "optional": false,
+          "type": "Identifier",
+          "typeAnnotation": undefined,
+        },
+        "params": [],
+        "returnType": {
+          "type": "TSTypeAnnotation",
+          "typeAnnotation": {
+            "type": "TSTypeReference",
+            "typeArguments": undefined,
+            "typeName": {
+              "left": {
+                "decorators": [],
+                "name": "JSX",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "right": {
+                "decorators": [],
+                "name": "Element",
+                "optional": false,
+                "type": "Identifier",
+                "typeAnnotation": undefined,
+              },
+              "type": "TSQualifiedName",
+            },
+          },
+        },
+        "type": "FunctionDeclaration",
+        "typeParameters": undefined,
+      },
+      "exportKind": "value",
+      "type": "ExportDefaultDeclaration",
+    },
+  ],
+  "sourceType": "module",
+  "type": "Program",
+}
+`;
