@@ -1,0 +1,16 @@
+[
+	{
+		"name": "@anvilkit/plugin-export-react",
+		"path": "dist/index.js",
+		"limit": "6 KB",
+		"gzip": true,
+		"ignore": [
+			"react",
+			"@puckeditor/core",
+			"@anvilkit/core",
+			"@anvilkit/ir",
+			"@anvilkit/schema",
+			"@anvilkit/utils"
+		]
+	}
+]
