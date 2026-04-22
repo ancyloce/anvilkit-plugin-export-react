@@ -109,6 +109,54 @@ describe("collectReactAssets — static-import strategy", () => {
 		expect(plan.warnings).toHaveLength(1);
 		expect(plan.warnings[0]?.code).toBe("EXTERNAL_URL_STATIC_IMPORT");
 	});
+
+	it("rejects traversal segments and surfaces UNSAFE_ASSET_PATH", () => {
+		const plan = collectReactAssets(
+			irWithHeroSrc("../../../etc/passwd"),
+			"static-import",
+		);
+		expect(plan.imports).toHaveLength(0);
+		expect(plan.rewrites.size).toBe(0);
+		expect(plan.warnings[0]?.code).toBe("UNSAFE_ASSET_PATH");
+	});
+
+	it("rejects javascript: scheme under static-import", () => {
+		const plan = collectReactAssets(
+			irWithHeroSrc("javascript:alert(1)"),
+			"static-import",
+		);
+		expect(plan.imports).toHaveLength(0);
+		expect(plan.warnings.some((w) => w.code === "EXTERNAL_URL_STATIC_IMPORT")).toBe(true);
+	});
+
+	it("rejects file: scheme under static-import", () => {
+		const plan = collectReactAssets(
+			irWithHeroSrc("file:///etc/passwd"),
+			"static-import",
+		);
+		expect(plan.imports).toHaveLength(0);
+		expect(plan.warnings.some((w) => w.code === "EXTERNAL_URL_STATIC_IMPORT")).toBe(true);
+	});
+
+	it("treats same-path URLs with distinct query strings as distinct bindings (documented)", () => {
+		const ir: PageIR = {
+			version: "1",
+			root: {
+				id: "root",
+				type: "__root__",
+				props: {},
+				children: [
+					{ id: "a", type: "Section", props: { imageSrc: "/assets/bg.jpg?v=1" } },
+					{ id: "b", type: "Section", props: { imageSrc: "/assets/bg.jpg?v=2" } },
+				],
+			},
+			assets: [],
+			metadata: {},
+		};
+		const plan = collectReactAssets(ir, "static-import");
+		expect(plan.imports).toHaveLength(2);
+		expect(plan.rewrites.size).toBe(2);
+	});
 });
 
 describe("emitReact — asset strategy integration", () => {

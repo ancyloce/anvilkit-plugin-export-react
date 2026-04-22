@@ -111,4 +111,34 @@ describe("serializeProp — non-serializable values", () => {
 		expect(result.warnings[0]?.code).toBe("NON_SERIALIZABLE_PROP");
 		expect(result.warnings[0]?.nodeId).toBe("n-2");
 	});
+
+	it("nested Date inside an object surfaces a warning (not silently ISO-stringified)", () => {
+		const result = serializeProp(
+			{ createdAt: new Date("2026-01-01") },
+			{ propName: "meta", nodeId: "n-3" },
+		);
+		expect(result.value).toBe("{/* omitted: non-serializable */}");
+		expect(result.warnings[0]?.code).toBe("NON_SERIALIZABLE_PROP");
+		expect(result.warnings[0]?.nodeId).toBe("n-3");
+	});
+
+	it("nested Date inside an array surfaces a warning", () => {
+		const result = serializeProp([{ at: new Date("2026-01-01") }], {
+			propName: "events",
+		});
+		expect(result.value).toBe("{/* omitted: non-serializable */}");
+		expect(result.warnings[0]?.code).toBe("NON_SERIALIZABLE_PROP");
+	});
+
+	it("bigint at top level surfaces a warning", () => {
+		const result = serializeProp(10n, { propName: "big" });
+		expect(result.value).toBe("{/* omitted: non-serializable */}");
+		expect(result.warnings[0]?.code).toBe("NON_SERIALIZABLE_PROP");
+	});
+
+	it("symbol at top level surfaces a warning", () => {
+		const result = serializeProp(Symbol("s"), { propName: "sym" });
+		expect(result.value).toBe("{/* omitted: non-serializable */}");
+		expect(result.warnings[0]?.code).toBe("NON_SERIALIZABLE_PROP");
+	});
 });

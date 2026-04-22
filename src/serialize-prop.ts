@@ -117,11 +117,70 @@ function serializeComposite(
 	opts?: { readonly nodeId?: string; readonly propName?: string },
 ): SerializedProp {
 	const warnings: ExportWarning[] = [];
+	// Pre-walk before JSON.stringify so host-provided toJSON hooks (notably
+	// Date.prototype.toJSON) cannot hide nested non-serializable values
+	// behind an ISO-string disguise in the replacer.
+	detectUnserializable(value, warnings, opts, new WeakSet());
+	if (warnings.length > 0) {
+		return { value: NON_SERIALIZABLE_PLACEHOLDER, warnings };
+	}
 	const json = safeJsonStringify(value, warnings, opts);
 	if (warnings.length > 0) {
 		return { value: NON_SERIALIZABLE_PLACEHOLDER, warnings };
 	}
 	return { value: `{${json}}`, warnings: [] };
+}
+
+function isUnserializable(value: unknown): boolean {
+	if (value === null) return false;
+	const t = typeof value;
+	if (t === "function" || t === "symbol" || t === "bigint" || t === "undefined") {
+		return true;
+	}
+	if (t !== "object") return false;
+	return (
+		value instanceof Date ||
+		value instanceof Map ||
+		value instanceof Set ||
+		value instanceof RegExp ||
+		value instanceof Promise
+	);
+}
+
+function detectUnserializable(
+	value: unknown,
+	warnings: ExportWarning[],
+	opts: { readonly nodeId?: string; readonly propName?: string } | undefined,
+	seen: WeakSet<object>,
+): void {
+	if (value === null) return;
+	if (isUnserializable(value)) {
+		warnings.push({
+			level: "warn",
+			code: "NON_SERIALIZABLE_PROP",
+			message: `Prop \`${
+				opts?.propName ?? "?"
+			}\` contains a non-serializable ${describeUnserializableValue(value)}.`,
+			...(opts?.nodeId ? { nodeId: opts.nodeId } : {}),
+		});
+		return;
+	}
+	if (typeof value !== "object") return;
+	if (seen.has(value as object)) return;
+	seen.add(value as object);
+	if (Array.isArray(value)) {
+		for (const entry of value) {
+			detectUnserializable(entry, warnings, opts, seen);
+			if (warnings.length > 0) return;
+		}
+		return;
+	}
+	if (isPlainObject(value)) {
+		for (const entry of Object.values(value)) {
+			detectUnserializable(entry, warnings, opts, seen);
+			if (warnings.length > 0) return;
+		}
+	}
 }
 
 function safeJsonStringify(
@@ -130,30 +189,7 @@ function safeJsonStringify(
 	opts?: { readonly nodeId?: string; readonly propName?: string },
 ): string {
 	try {
-		return JSON.stringify(value, (_key, inner) => {
-			if (
-				inner !== null &&
-				(typeof inner === "function" ||
-					typeof inner === "symbol" ||
-					typeof inner === "bigint" ||
-					inner instanceof Date ||
-					inner instanceof Map ||
-					inner instanceof Set ||
-					inner instanceof RegExp ||
-					inner instanceof Promise)
-			) {
-				warnings.push({
-					level: "warn",
-					code: "NON_SERIALIZABLE_PROP",
-					message: `Prop \`${
-						opts?.propName ?? "?"
-					}\` contains a non-serializable ${describeUnserializableValue(inner)}.`,
-					...(opts?.nodeId ? { nodeId: opts.nodeId } : {}),
-				});
-				return null;
-			}
-			return inner;
-		});
+		return JSON.stringify(value);
 	} catch {
 		warnings.push({
 			level: "warn",

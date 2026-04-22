@@ -28,6 +28,18 @@ describe("emitReact — basic shape", () => {
 			/expected root node type "__root__"/,
 		);
 	});
+
+	it("throws when ir.version is not the supported version", () => {
+		const bad = {
+			version: "2",
+			root: { id: "root", type: "__root__", props: {} },
+			assets: [],
+			metadata: {},
+		} as unknown as PageIR;
+		expect(() => emitReact(bad, REACT_EXPORT_DEFAULTS)).toThrow(
+			/unsupported ir.version/,
+		);
+	});
 });
 
 describe("emitReact — options", () => {
@@ -172,6 +184,22 @@ describe("emitReact — CJS output shape", () => {
 		expect(result.code).toContain("module.exports = Page;");
 		expect(result.code).toContain("module.exports.default = Page;");
 		expect(result.code).not.toContain("export default");
+	});
+
+	it("surfaces CJS_REQUIRES_JSX info warning when syntax is tsx + moduleResolution is cjs", () => {
+		const result = emitReact(
+			heroFixture,
+			resolveReactExportOptions({ syntax: "tsx", moduleResolution: "cjs" }),
+		);
+		expect(result.warnings.some((w) => w.code === "CJS_REQUIRES_JSX")).toBe(true);
+	});
+
+	it("does not emit CJS_REQUIRES_JSX for jsx + cjs", () => {
+		const result = emitReact(
+			heroFixture,
+			resolveReactExportOptions({ syntax: "jsx", moduleResolution: "cjs" }),
+		);
+		expect(result.warnings.some((w) => w.code === "CJS_REQUIRES_JSX")).toBe(false);
 	});
 });
 

@@ -6,6 +6,10 @@ import type { ImportRecord } from "./types.js";
  * `@anvilkit/ir`'s `collectAssets` pattern (deliberately kept in
  * sync with that regex to avoid a runtime dependency on internal IR
  * exports).
+ *
+ * Sync obligation: if `packages/ir/src/collect-assets.ts` adds a new
+ * asset-shaped key, mirror it here. See docs/code-review phase5 review
+ * item S6 for the drift rationale.
  */
 const ASSET_PROP_KEYS = new Set([
 	"src",
@@ -76,7 +80,22 @@ function sanitizeForIdent(input: string): string {
 }
 
 function isExternalUrl(url: string): boolean {
-	return /^(?:https?:|\/\/|data:|blob:)/i.test(url);
+	return /^(?:https?:|\/\/|data:|blob:|file:|javascript:)/i.test(url);
+}
+
+function hasTraversalSegment(url: string): boolean {
+	const pathPart = url.split(/[?#]/, 1)[0] ?? "";
+	return pathPart.split(/[\\/]/).some((segment) => segment === "..");
+}
+
+function hasUnsafeScheme(url: string): boolean {
+	// Any `scheme:` prefix that isn't one of the known local-asset cases
+	// (`./`, `../`, `/`, bare relative) is considered unsafe for static
+	// import — defense in depth beyond the isExternalUrl heuristic.
+	const schemeMatch = url.match(/^([A-Za-z][A-Za-z0-9+.-]*):/);
+	if (!schemeMatch) return false;
+	const scheme = schemeMatch[1]?.toLowerCase();
+	return scheme !== undefined;
 }
 
 function isAssetProp(key: string): boolean {
@@ -180,6 +199,16 @@ export function collectReactAssets(
 					nodeId,
 				});
 			}
+			continue;
+		}
+
+		if (hasTraversalSegment(url) || hasUnsafeScheme(url)) {
+			warnings.push({
+				level: "warn",
+				code: "UNSAFE_ASSET_PATH",
+				message: `Asset URL \`${url}\` on prop \`${propName}\` contains a traversal segment or non-local scheme; emitted as a string instead.`,
+				nodeId,
+			});
 			continue;
 		}
 

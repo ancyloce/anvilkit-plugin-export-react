@@ -1,6 +1,6 @@
 import type { ExportWarning, PageIR, PageIRNode } from "@anvilkit/core/types";
 
-import { collectReactAssets, isAssetPropKey } from "./assets.js";
+import { type AssetRewrite, collectReactAssets, isAssetPropKey } from "./assets.js";
 import { collectImports } from "./collect-imports.js";
 import { serializeProp } from "./serialize-prop.js";
 import type {
@@ -11,6 +11,7 @@ import type {
 } from "./types.js";
 
 const ROOT_TYPE = "__root__";
+const SUPPORTED_IR_VERSION = "1";
 const INDENT = "  ";
 
 const VALID_JSX_TAG = /^[A-Z][A-Za-z0-9]*(?:\.[A-Z][A-Za-z0-9]*)*$/;
@@ -19,10 +20,7 @@ const VALID_JSX_ATTR = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 interface EmitContext {
 	readonly opts: ResolvedReactExportOptions;
 	readonly warnings: ExportWarning[];
-	readonly assetRewrites: ReadonlyMap<
-		string,
-		{ readonly binding: string; readonly url: string }
-	>;
+	readonly assetRewrites: ReadonlyMap<string, AssetRewrite>;
 }
 
 function indent(depth: number): string {
@@ -223,17 +221,26 @@ export function emitReact(
 			`emitReact: expected root node type "__root__", received "${ir.root.type}"`,
 		);
 	}
+	if (ir.version !== SUPPORTED_IR_VERSION) {
+		throw new Error(
+			`emitReact: unsupported ir.version "${String(ir.version)}"; expected "${SUPPORTED_IR_VERSION}"`,
+		);
+	}
 
 	const assetPlan = collectReactAssets(ir, opts.assetStrategy);
-	const rewrites = new Map<string, { binding: string; url: string }>();
-	for (const [url, record] of assetPlan.rewrites) {
-		rewrites.set(url, { binding: record.binding, url });
-	}
 	const warnings: ExportWarning[] = [...assetPlan.warnings];
+	if (opts.syntax === "tsx" && opts.moduleResolution === "cjs") {
+		warnings.push({
+			level: "info",
+			code: "CJS_REQUIRES_JSX",
+			message:
+				"Emitting TSX syntax under a CJS module system; consumers must compile the result with a TypeScript toolchain (Node cannot require .tsx directly).",
+		});
+	}
 	const ctx: EmitContext = {
 		opts,
 		warnings,
-		assetRewrites: rewrites,
+		assetRewrites: assetPlan.rewrites,
 	};
 
 	const importManifest = opts.includeImports ? collectImports(ir) : { imports: [] };
