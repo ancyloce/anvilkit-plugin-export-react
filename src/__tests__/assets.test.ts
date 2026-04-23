@@ -1,8 +1,9 @@
 import type { PageIR } from "@anvilkit/core/types";
 import { describe, expect, it } from "vitest";
 
-import { collectReactAssets } from "../assets.js";
+import { collectReactAssets, resolveReactAssetUrls } from "../assets.js";
 import { emitReact } from "../emitter.js";
+import { reactFormat } from "../format-definition.js";
 import { resolveReactExportOptions } from "../types.js";
 
 function irWithHeroSrc(url: string): PageIR {
@@ -185,5 +186,82 @@ describe("emitReact — asset strategy integration", () => {
 		);
 		expect(result.code).toContain('backgroundSrc="https://cdn.example.com/bg.jpg"');
 		expect(result.warnings.some((w) => w.code === "EXTERNAL_URL_STATIC_IMPORT")).toBe(true);
+	});
+});
+
+describe("React export asset resolvers", () => {
+	it("rewrites asset:// URLs before emitting React source", async () => {
+		const result = await reactFormat.run(
+			irWithHeroSrc("asset://asset-1"),
+			{ assetStrategy: "url-prop" },
+			{
+				assetResolvers: [
+					(url) =>
+						url === "asset://asset-1"
+							? { url: "https://cdn.example.com/hero-bg.jpg" }
+							: null,
+				],
+			},
+		);
+
+		expect(result.content).toContain(
+			'backgroundSrc="https://cdn.example.com/hero-bg.jpg"',
+		);
+		expect(result.content).not.toContain("asset://");
+	});
+
+	it("drops hostile resolved URLs and emits ASSET_UNRESOLVED", async () => {
+		const result = await reactFormat.run(
+			irWithHeroSrc("asset://asset-1"),
+			{ assetStrategy: "url-prop" },
+			{
+				assetResolvers: [
+					(url) =>
+						url === "asset://asset-1"
+							? { url: "javascript:alert(1)" }
+							: null,
+				],
+			},
+		);
+
+		expect(result.content).not.toContain("javascript:");
+		expect(result.content).not.toContain("asset://");
+		expect(
+			result.warnings?.some((warning) => warning.code === "ASSET_UNRESOLVED"),
+		).toBe(true);
+	});
+
+	it("allows safe raster image data URLs from resolvers", async () => {
+		const dataUrl = "data:image/png;base64,aGVsbG8=";
+		const result = await reactFormat.run(
+			irWithHeroSrc("asset://asset-1"),
+			{ assetStrategy: "url-prop" },
+			{
+				assetResolvers: [
+					(url) => (url === "asset://asset-1" ? { url: dataUrl } : null),
+				],
+			},
+		);
+
+		expect(result.content).toContain(`backgroundSrc="${dataUrl}"`);
+		expect(result.content).not.toContain("asset://");
+	});
+});
+
+describe("resolveReactAssetUrls", () => {
+	it("rewrites the IR without mutating the input", async () => {
+		const ir = irWithHeroSrc("asset://asset-1");
+		const next = await resolveReactAssetUrls(ir, [
+			(url) =>
+				url === "asset://asset-1"
+					? { url: "https://cdn.example.com/hero-bg.jpg" }
+					: null,
+		]);
+
+		expect(ir.root.children?.[0]?.props.backgroundSrc).toBe("asset://asset-1");
+		expect(next.ir.root.children?.[0]?.props.backgroundSrc).toBe(
+			"https://cdn.example.com/hero-bg.jpg",
+		);
+		expect(Object.isFrozen(next.ir)).toBe(true);
 	});
 });
