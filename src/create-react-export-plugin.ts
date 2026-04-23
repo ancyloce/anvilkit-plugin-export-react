@@ -4,6 +4,7 @@ import type {
 	StudioPluginMeta,
 } from "@anvilkit/core/types";
 
+import { resolveReactAssetUrls } from "./assets.js";
 import { emitReact } from "./emitter.js";
 import { reactFormat } from "./format-definition.js";
 import { exportReactHeaderAction } from "./header-action.js";
@@ -41,17 +42,24 @@ export function createReactExportPlugin(
 			? reactFormat
 			: {
 					...reactFormat,
-					run: async (ir, callOptions) => {
+					run: async (ir, callOptions, runCtx) => {
 						const resolved = resolveReactExportOptions({
 							...opts,
 							...callOptions,
 						});
-						const { code, warnings } = emitReact(ir, resolved);
+						const {
+							ir: resolvedIr,
+							warnings: resolutionWarnings,
+						} = await resolveReactAssetUrls(
+							ir,
+							runCtx?.assetResolvers ?? [],
+						);
+						const { code, warnings } = emitReact(resolvedIr, resolved);
 						const extension = resolved.syntax === "jsx" ? "jsx" : "tsx";
 						return {
 							content: code,
 							filename: `page.${extension}`,
-							warnings,
+							warnings: [...resolutionWarnings, ...warnings],
 						};
 					},
 				};

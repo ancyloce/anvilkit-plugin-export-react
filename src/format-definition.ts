@@ -1,5 +1,6 @@
 import type { ExportFormatDefinition } from "@anvilkit/core/types";
 
+import { resolveReactAssetUrls } from "./assets.js";
 import { emitReact } from "./emitter.js";
 import {
 	type ReactExportOptions,
@@ -11,14 +12,18 @@ export const reactFormat: ExportFormatDefinition<ReactExportOptions> = {
 	label: "React (.tsx)",
 	extension: "tsx",
 	mimeType: "text/plain",
-	run: async (ir, options) => {
+	run: async (ir, options, runCtx) => {
 		const resolved = resolveReactExportOptions(options);
-		const { code, warnings } = emitReact(ir, resolved);
+		const {
+			ir: resolvedIr,
+			warnings: resolutionWarnings,
+		} = await resolveReactAssetUrls(ir, runCtx?.assetResolvers ?? []);
+		const { code, warnings } = emitReact(resolvedIr, resolved);
 		const extension = resolved.syntax === "jsx" ? "jsx" : "tsx";
 		return {
 			content: code,
 			filename: `page.${extension}`,
-			warnings,
+			warnings: [...resolutionWarnings, ...warnings],
 		};
 	},
 };
