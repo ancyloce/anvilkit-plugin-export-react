@@ -5,8 +5,8 @@ import { defineConfig } from "@rslib/core";
  *
  * Each `.ts` under `src/` becomes an individual ESM + CJS output in
  * `dist/`, matching `plugin-export-html`'s layout. `@anvilkit/core`,
- * `@anvilkit/ir`, `@anvilkit/utils`, `@puckeditor/core`, and `react`
- * are all left external so consumers install exactly one copy.
+ * `@puckeditor/core`, and `react` are all left external so consumers
+ * install exactly one copy.
  */
 export default defineConfig({
 	source: {
@@ -36,12 +36,6 @@ export default defineConfig({
 	],
 	output: {
 		target: "node",
-		externals: [
-			"@anvilkit/core",
-			"@anvilkit/ir",
-			"@anvilkit/utils",
-			"@puckeditor/core",
-			"react",
-		],
+		externals: ["@anvilkit/core", "@puckeditor/core", "react"],
 	},
 });
