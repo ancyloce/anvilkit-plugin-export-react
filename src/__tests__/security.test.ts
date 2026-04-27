@@ -46,8 +46,11 @@ describe("React exporter — hostile string props (JSX text-context payloads)", 
 		expect(result.value).toBe(
 			`{${JSON.stringify("<script>alert('pwn')</script>")}}`,
 		);
+		// The literal MUST be inside JSX expression braces — never as a
+		// bare attribute-string `attr="<script>..."` where `<` would
+		// terminate the attribute and start a real `<script>` element.
 		expect(result.value.startsWith("{")).toBe(true);
-		expect(result.value).not.toContain('"<script>');
+		expect(result.value.endsWith("}")).toBe(true);
 	});
 
 	it("emits the <script> payload through emitReact without breaking attribute quoting", () => {
