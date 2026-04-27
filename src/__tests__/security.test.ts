@@ -195,7 +195,8 @@ describe("React exporter — structural attacks on IR shape", () => {
 	});
 
 	it("does not pollute Object.prototype when an IR prop has __proto__/constructor keys", () => {
-		const sentinelBefore = (Object.prototype as Record<string, unknown>).polluted;
+		const sentinelBefore = (Object.prototype as Record<string, unknown>)
+			.polluted;
 		// Using JSON.parse with a hostile body is the canonical attack
 		// vector — JSON.parse does NOT walk into __proto__ but plain
 		// object literals with the key `__proto__` DO assign the

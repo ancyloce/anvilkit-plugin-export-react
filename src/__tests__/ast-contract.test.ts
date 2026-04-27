@@ -5,7 +5,15 @@ import { emitReact } from "../emitter.js";
 import { REACT_EXPORT_DEFAULTS, resolveReactExportOptions } from "../types.js";
 import { fixtures } from "./__fixtures__/index.js";
 
-const NOISE_KEYS = new Set(["loc", "range", "raw", "start", "end", "tokens", "comments"]);
+const NOISE_KEYS = new Set([
+	"loc",
+	"range",
+	"raw",
+	"start",
+	"end",
+	"tokens",
+	"comments",
+]);
 
 type Plain = unknown;
 

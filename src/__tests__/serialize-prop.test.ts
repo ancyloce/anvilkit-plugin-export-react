@@ -35,8 +35,12 @@ describe("serializeProp — primitives", () => {
 	});
 
 	it("emits angle/brace tokens inside a JSX expression so the JSX parser cannot misread them", () => {
-		expect(serializeProp("<script>").value).toBe(`{${JSON.stringify("<script>")}}`);
-		expect(serializeProp("a {b} c").value).toBe(`{${JSON.stringify("a {b} c")}}`);
+		expect(serializeProp("<script>").value).toBe(
+			`{${JSON.stringify("<script>")}}`,
+		);
+		expect(serializeProp("a {b} c").value).toBe(
+			`{${JSON.stringify("a {b} c")}}`,
+		);
 	});
 
 	it("emits numbers inside JSX expression braces", () => {
@@ -95,7 +99,9 @@ describe("serializeProp — non-serializable values", () => {
 	});
 
 	it("Dates surface NON_SERIALIZABLE_PROP warnings", () => {
-		const result = serializeProp(new Date("2026-01-01"), { propName: "createdAt" });
+		const result = serializeProp(new Date("2026-01-01"), {
+			propName: "createdAt",
+		});
 		expect(result.value).toBe("{/* omitted: non-serializable */}");
 		expect(result.warnings[0]?.code).toBe("NON_SERIALIZABLE_PROP");
 	});

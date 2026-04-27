@@ -22,12 +22,18 @@ function makeCtx(): StudioPluginContext {
 
 describe("createReactExportPlugin registration", () => {
 	it("registers the react export format during compilePlugins", async () => {
-		const runtime = await compilePlugins([createReactExportPlugin()], makeCtx());
+		const runtime = await compilePlugins(
+			[createReactExportPlugin()],
+			makeCtx(),
+		);
 		expect(runtime.exportFormats.has("react")).toBe(true);
 	});
 
 	it("contributes the export-react header action", async () => {
-		const runtime = await compilePlugins([createReactExportPlugin()], makeCtx());
+		const runtime = await compilePlugins(
+			[createReactExportPlugin()],
+			makeCtx(),
+		);
 		expect(
 			runtime.headerActions.some((action) => action.id === "export-react"),
 		).toBe(true);
@@ -42,20 +48,26 @@ describe("createReactExportPlugin registration", () => {
 	});
 
 	it("runs the registered react format and returns page.tsx", async () => {
-		const runtime = await compilePlugins([createReactExportPlugin()], makeCtx());
+		const runtime = await compilePlugins(
+			[createReactExportPlugin()],
+			makeCtx(),
+		);
 		const format = runtime.exportFormats.get("react");
 		expect(format).toBeDefined();
 		if (!format) throw new Error("expected react format");
 
 		const result = await format.run(heroFixture, {});
 		expect(result.filename).toBe("page.tsx");
-		expect(result.content).toContain("import { Hero } from \"@anvilkit/hero\";");
+		expect(result.content).toContain('import { Hero } from "@anvilkit/hero";');
 		expect(result.content).toContain("<Hero");
 		expect(result.content).toContain("Ship updates without friction.");
 	});
 
 	it("switches to .jsx when syntax=jsx is requested", async () => {
-		const runtime = await compilePlugins([createReactExportPlugin()], makeCtx());
+		const runtime = await compilePlugins(
+			[createReactExportPlugin()],
+			makeCtx(),
+		);
 		const format = runtime.exportFormats.get("react");
 		if (!format) throw new Error("expected react format");
 

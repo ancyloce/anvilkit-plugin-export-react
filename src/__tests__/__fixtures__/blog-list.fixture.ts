@@ -12,7 +12,11 @@ export const blogListFixture: PageIR = {
 				type: "BlogList",
 				props: {
 					posts: [
-						{ title: "Ship log", slug: "/blog/ship-log", readingTimeMinutes: 4 },
+						{
+							title: "Ship log",
+							slug: "/blog/ship-log",
+							readingTimeMinutes: 4,
+						},
 						{
 							title: "Architecture diary",
 							slug: "/blog/architecture-diary",

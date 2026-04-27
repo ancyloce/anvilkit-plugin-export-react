@@ -5,14 +5,16 @@ import {
 	collectImports,
 	componentTypeToPackageSlug,
 } from "../collect-imports.js";
-import { heroFixture } from "./__fixtures__/hero.fixture.js";
 import { bentoGridFixture } from "./__fixtures__/bento-grid.fixture.js";
+import { heroFixture } from "./__fixtures__/hero.fixture.js";
 
 describe("componentTypeToPackageSlug", () => {
 	it("kebab-cases PascalCase types", () => {
 		expect(componentTypeToPackageSlug("Hero")).toBe("hero");
 		expect(componentTypeToPackageSlug("BentoGrid")).toBe("bento-grid");
-		expect(componentTypeToPackageSlug("PricingMinimal")).toBe("pricing-minimal");
+		expect(componentTypeToPackageSlug("PricingMinimal")).toBe(
+			"pricing-minimal",
+		);
 		expect(componentTypeToPackageSlug("LogoClouds")).toBe("logo-clouds");
 	});
 });
@@ -71,6 +73,8 @@ describe("collectImports", () => {
 
 	it("excludes the __root__ wrapper type", () => {
 		const manifest = collectImports(bentoGridFixture);
-		expect(manifest.imports.find((imp) => imp.binding === "__root__")).toBeUndefined();
+		expect(
+			manifest.imports.find((imp) => imp.binding === "__root__"),
+		).toBeUndefined();
 	});
 });

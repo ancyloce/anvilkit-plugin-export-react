@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 
 import { emitReact } from "../emitter.js";
 import { REACT_EXPORT_DEFAULTS, resolveReactExportOptions } from "../types.js";
-import { heroFixture } from "./__fixtures__/hero.fixture.js";
 import { bentoGridFixture } from "./__fixtures__/bento-grid.fixture.js";
+import { heroFixture } from "./__fixtures__/hero.fixture.js";
 import { fixtures } from "./__fixtures__/index.js";
 
 describe("emitReact — basic shape", () => {
@@ -44,12 +44,18 @@ describe("emitReact — basic shape", () => {
 
 describe("emitReact — options", () => {
 	it("tsx syntax keeps the JSX.Element return-type annotation", () => {
-		const result = emitReact(heroFixture, resolveReactExportOptions({ syntax: "tsx" }));
+		const result = emitReact(
+			heroFixture,
+			resolveReactExportOptions({ syntax: "tsx" }),
+		);
 		expect(result.code).toContain(": JSX.Element");
 	});
 
 	it("jsx syntax strips the return-type annotation", () => {
-		const result = emitReact(heroFixture, resolveReactExportOptions({ syntax: "jsx" }));
+		const result = emitReact(
+			heroFixture,
+			resolveReactExportOptions({ syntax: "jsx" }),
+		);
 		expect(result.code).not.toContain(": JSX.Element");
 	});
 
@@ -191,7 +197,9 @@ describe("emitReact — CJS output shape", () => {
 			heroFixture,
 			resolveReactExportOptions({ syntax: "tsx", moduleResolution: "cjs" }),
 		);
-		expect(result.warnings.some((w) => w.code === "CJS_REQUIRES_JSX")).toBe(true);
+		expect(result.warnings.some((w) => w.code === "CJS_REQUIRES_JSX")).toBe(
+			true,
+		);
 	});
 
 	it("does not emit CJS_REQUIRES_JSX for jsx + cjs", () => {
@@ -199,7 +207,9 @@ describe("emitReact — CJS output shape", () => {
 			heroFixture,
 			resolveReactExportOptions({ syntax: "jsx", moduleResolution: "cjs" }),
 		);
-		expect(result.warnings.some((w) => w.code === "CJS_REQUIRES_JSX")).toBe(false);
+		expect(result.warnings.some((w) => w.code === "CJS_REQUIRES_JSX")).toBe(
+			false,
+		);
 	});
 });
 
@@ -211,9 +221,7 @@ describe("emitReact — hostile-IR hardening", () => {
 				id: "root",
 				type: "__root__",
 				props: {},
-				children: [
-					{ id: "bad-1", type: "Hero onError=alert(1)", props: {} },
-				],
+				children: [{ id: "bad-1", type: "Hero onError=alert(1)", props: {} }],
 			},
 			assets: [],
 			metadata: {},
@@ -221,7 +229,29 @@ describe("emitReact — hostile-IR hardening", () => {
 		const result = emitReact(ir, REACT_EXPORT_DEFAULTS);
 		expect(result.code).not.toContain("onError=alert");
 		expect(result.code).toContain("{/* omitted: invalid component type */}");
-		expect(result.warnings.some((w) => w.code === "INVALID_NODE_TYPE")).toBe(true);
+		expect(result.warnings.some((w) => w.code === "INVALID_NODE_TYPE")).toBe(
+			true,
+		);
+	});
+
+	it("rejects dotted component names that cannot be imported", () => {
+		const ir: PageIR = {
+			version: "1",
+			root: {
+				id: "root",
+				type: "__root__",
+				props: {},
+				children: [{ id: "bad-dotted", type: "Layout.Header", props: {} }],
+			},
+			assets: [],
+			metadata: {},
+		};
+		const result = emitReact(ir, REACT_EXPORT_DEFAULTS);
+		expect(result.code).not.toContain("<Layout.Header");
+		expect(result.code).toContain("{/* omitted: invalid component type */}");
+		expect(result.warnings.some((w) => w.code === "INVALID_NODE_TYPE")).toBe(
+			true,
+		);
 	});
 
 	it("emits INVALID_PROP_NAME and drops the attribute when prop key contains whitespace", () => {
@@ -245,7 +275,9 @@ describe("emitReact — hostile-IR hardening", () => {
 		const result = emitReact(ir, REACT_EXPORT_DEFAULTS);
 		expect(result.code).not.toContain("onClick x=1");
 		expect(result.code).toContain('title="keep"');
-		expect(result.warnings.some((w) => w.code === "INVALID_PROP_NAME")).toBe(true);
+		expect(result.warnings.some((w) => w.code === "INVALID_PROP_NAME")).toBe(
+			true,
+		);
 	});
 });
 
