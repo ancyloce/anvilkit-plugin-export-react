@@ -9,13 +9,8 @@ import type { ImportRecord } from "./types.js";
 
 /**
  * The set of prop keys the IR treats as asset references. Mirrors
- * `@anvilkit/ir`'s `collectAssets` pattern (deliberately kept in
- * sync with that regex to avoid a runtime dependency on internal IR
- * exports).
- *
- * Sync obligation: if `packages/ir/src/collect-assets.ts` adds a new
- * asset-shaped key, mirror it here. See docs/code-review phase5 review
- * item S6 for the drift rationale.
+ * `@anvilkit/ir`'s `ASSET_KEY_PATTERN` regex; kept as a local copy so
+ * the React plugin has no runtime dependency on `@anvilkit/ir`.
  */
 const ASSET_PROP_KEYS = new Set([
 	"src",
@@ -130,54 +125,87 @@ export async function resolveReactAssetUrls(
 	ir: PageIR,
 	assetResolvers: readonly IRAssetResolver[] = [],
 ): Promise<{ ir: PageIR; warnings: readonly ExportWarning[] }> {
-	const warnings: ExportWarning[] = [];
 	const blockedUrls = new Set<string>();
 	const rewrittenUrls = new Map<string, string>();
 	const references = collectAssetReferences(ir);
 
-	for (const [url, info] of references) {
-		const assetId = parseAssetId(url);
-		if (assetId === null) {
-			continue;
-		}
+	// Resolve concurrently; an asset-manager resolver may be async, and
+	// awaiting one at a time gives N×M latency for N assets and M ms per
+	// resolver call. Per-entry warnings are collected in declaration
+	// order after all promises settle.
+	type EntryResult = {
+		readonly url: string;
+		readonly blocked: boolean;
+		readonly rewrittenTo?: string;
+		readonly warning?: ExportWarning;
+	};
 
-		try {
-			const resolution = await resolveWithResolvers(url, assetResolvers);
-			if (resolution === null) {
-				blockedUrls.add(url);
-				warnings.push(makeUnresolvedWarning(assetId, info.nodeId));
-				continue;
+	const entries = [...references.entries()];
+	const settled = await Promise.all(
+		entries.map(async ([url, info]): Promise<EntryResult | null> => {
+			const assetId = parseAssetId(url);
+			if (assetId === null) {
+				return null;
 			}
 
-			const normalizedUrl = normalizeResolvedAssetUrl(resolution.url, {
-				allowSafeDataImage:
-					info.kind === "image" || info.allowSafeDataImage === true,
-			});
-			if (!normalizedUrl) {
-				blockedUrls.add(url);
-				warnings.push({
-					level: "warn",
-					code: "ASSET_UNRESOLVED",
-					message:
-						`Asset "${assetId}" resolved to a disallowed URL during React export and was omitted.`,
-					...(info.nodeId ? { nodeId: info.nodeId } : {}),
+			try {
+				const resolution = await resolveWithResolvers(url, assetResolvers);
+				if (resolution === null) {
+					return {
+						url,
+						blocked: true,
+						warning: makeUnresolvedWarning(assetId, info.nodeId),
+					};
+				}
+
+				const normalizedUrl = normalizeResolvedAssetUrl(resolution.url, {
+					allowSafeDataImage:
+						info.kind === "image" || info.allowSafeDataImage === true,
 				});
-				continue;
-			}
+				if (!normalizedUrl) {
+					return {
+						url,
+						blocked: true,
+						warning: {
+							level: "warn",
+							code: "ASSET_UNRESOLVED",
+							message:
+								`Asset "${assetId}" resolved to a disallowed URL during React export and was omitted.`,
+							...(info.nodeId ? { nodeId: info.nodeId } : {}),
+						},
+					};
+				}
 
-			rewrittenUrls.set(url, normalizedUrl);
-		} catch (error) {
-			if (!isAssetResolutionError(error)) {
-				throw error;
-			}
+				return { url, blocked: false, rewrittenTo: normalizedUrl };
+			} catch (error) {
+				if (!isAssetResolutionError(error)) {
+					throw error;
+				}
 
-			blockedUrls.add(url);
-			warnings.push({
-				level: "warn",
-				code: "ASSET_UNRESOLVED",
-				message: error.message,
-				...(info.nodeId ? { nodeId: info.nodeId } : {}),
-			});
+				return {
+					url,
+					blocked: true,
+					warning: {
+						level: "warn",
+						code: "ASSET_UNRESOLVED",
+						message: error.message,
+						...(info.nodeId ? { nodeId: info.nodeId } : {}),
+					},
+				};
+			}
+		}),
+	);
+
+	const warnings: ExportWarning[] = [];
+	for (const result of settled) {
+		if (result === null) continue;
+		if (result.blocked) {
+			blockedUrls.add(result.url);
+		} else if (result.rewrittenTo !== undefined) {
+			rewrittenUrls.set(result.url, result.rewrittenTo);
+		}
+		if (result.warning) {
+			warnings.push(result.warning);
 		}
 	}
 
@@ -239,8 +267,11 @@ function deriveBindingName(url: string): string {
 		.pop();
 	const stem = sanitizeForIdent((basename ?? "asset").replace(/\.[^.]+$/, ""));
 	const hash = fnv1a(url);
-	const prefix = /^[0-9]/.test(stem) || stem === "" ? `asset_${stem}` : stem;
-	return `${prefix || "asset"}_${hash}`;
+	if (stem === "") {
+		return `asset_${hash}`;
+	}
+	const prefix = /^[0-9]/.test(stem) ? `asset_${stem}` : stem;
+	return `${prefix}_${hash}`;
 }
 
 /**

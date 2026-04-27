@@ -17,6 +17,12 @@ const INDENT = "  ";
 const VALID_JSX_TAG = /^[A-Z][A-Za-z0-9]*(?:\.[A-Z][A-Za-z0-9]*)*$/;
 const VALID_JSX_ATTR = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 
+// Threshold (in characters of the inline prop segment) above which props
+// flip from a single-line JSX attribute layout to a multi-line block
+// layout. The multi-line layout is only applied when more than one
+// attribute actually renders, so a single long prop stays inline.
+const MAX_INLINE_PROP_WIDTH = 72;
+
 interface EmitContext {
 	readonly opts: ResolvedReactExportOptions;
 	readonly warnings: ExportWarning[];
@@ -32,20 +38,13 @@ function renderImport(record: ImportRecord, moduleSystem: "esm" | "cjs"): string
 		if (record.kind === "default") {
 			return `const ${record.binding} = require(${JSON.stringify(record.source)});`;
 		}
-		if (record.kind === "named") {
-			return `const { ${record.binding} } = require(${JSON.stringify(record.source)});`;
-		}
-		return `require(${JSON.stringify(record.source)});`;
+		return `const { ${record.binding} } = require(${JSON.stringify(record.source)});`;
 	}
 
-	switch (record.kind) {
-		case "default":
-			return `import ${record.binding} from ${JSON.stringify(record.source)};`;
-		case "named":
-			return `import { ${record.binding} } from ${JSON.stringify(record.source)};`;
-		default:
-			return `import ${JSON.stringify(record.source)};`;
+	if (record.kind === "default") {
+		return `import ${record.binding} from ${JSON.stringify(record.source)};`;
 	}
+	return `import { ${record.binding} } from ${JSON.stringify(record.source)};`;
 }
 
 function renderImports(
@@ -101,10 +100,10 @@ function renderProps(
 	node: PageIRNode,
 	depth: number,
 	ctx: EmitContext,
-): { readonly inline: string; readonly block: string } {
+): { readonly inline: string; readonly block: string; readonly count: number } {
 	const entries = Object.entries(node.props);
 	if (entries.length === 0) {
-		return { inline: "", block: "" };
+		return { inline: "", block: "", count: 0 };
 	}
 
 	const parts = entries
@@ -116,7 +115,7 @@ function renderProps(
 	const block = parts.length > 0
 		? `\n${parts.map((part) => `${blockIndent}${part}`).join("\n")}\n${indent(depth)}`
 		: "";
-	return { inline, block };
+	return { inline, block, count: parts.length };
 }
 
 function renderNode(node: PageIRNode, depth: number, ctx: EmitContext): string {
@@ -130,13 +129,12 @@ function renderNode(node: PageIRNode, depth: number, ctx: EmitContext): string {
 		});
 		return `${pad}{/* omitted: invalid component type */}`;
 	}
-	const { inline, block } = renderProps(node, depth, ctx);
+	const { inline, block, count } = renderProps(node, depth, ctx);
 
 	const hasChildren =
 		Array.isArray(node.children) && node.children.length > 0;
-	const propSegment = inline.length > 72 && Object.keys(node.props).length > 1
-		? block
-		: inline;
+	const propSegment =
+		inline.length > MAX_INLINE_PROP_WIDTH && count > 1 ? block : inline;
 
 	if (!hasChildren) {
 		const closing = propSegment.endsWith("\n" + pad) ? "/>" : " />";
@@ -227,8 +225,25 @@ export function emitReact(
 		);
 	}
 
-	const assetPlan = collectReactAssets(ir, opts.assetStrategy);
+	// `static-import` requires the import section to also be emitted —
+	// the JSX attributes are rewritten to `prop={asset_<hash>}` bindings
+	// that only exist if their `import` statement is also rendered. Fall
+	// back to `url-prop` semantics when the consumer disabled imports,
+	// and surface a warning so they can disambiguate.
+	const effectiveStrategy: ResolvedReactExportOptions["assetStrategy"] =
+		!opts.includeImports && opts.assetStrategy === "static-import"
+			? "url-prop"
+			: opts.assetStrategy;
+	const assetPlan = collectReactAssets(ir, effectiveStrategy);
 	const warnings: ExportWarning[] = [...assetPlan.warnings];
+	if (effectiveStrategy !== opts.assetStrategy) {
+		warnings.push({
+			level: "warn",
+			code: "INVALID_OPTION_COMBINATION",
+			message:
+				"`assetStrategy: \"static-import\"` requires `includeImports: true`; falling back to \"url-prop\" semantics for assets.",
+		});
+	}
 	if (opts.syntax === "tsx" && opts.moduleResolution === "cjs") {
 		warnings.push({
 			level: "info",
@@ -237,8 +252,12 @@ export function emitReact(
 				"Emitting TSX syntax under a CJS module system; consumers must compile the result with a TypeScript toolchain (Node cannot require .tsx directly).",
 		});
 	}
+	const effectiveOpts: ResolvedReactExportOptions = {
+		...opts,
+		assetStrategy: effectiveStrategy,
+	};
 	const ctx: EmitContext = {
-		opts,
+		opts: effectiveOpts,
 		warnings,
 		assetRewrites: assetPlan.rewrites,
 	};

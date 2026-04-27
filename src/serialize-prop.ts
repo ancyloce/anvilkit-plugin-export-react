@@ -40,15 +40,24 @@ function describeUnserializableValue(value: unknown): string {
 	return "unknown";
 }
 
-function escapeStringForJsx(value: string): string {
-	return value
-		.replace(/\\/g, "\\\\")
-		.replace(/"/g, "\\\"")
-		.replace(/\n/g, "\\n")
-		.replace(/\r/g, "\\r")
-		.replace(/\t/g, "\\t")
-		.replace(/\u2028/g, "\\u2028")
-		.replace(/\u2029/g, "\\u2029");
+// JSX attribute-string mode does NOT process JS-style escape sequences \u2014
+// the source characters between the quotes become the literal value, with
+// HTML-entity decoding as the only transformation. So any character whose
+// JSX-attribute meaning differs from the IR's intent (control whitespace,
+// the bidi line separators, backslashes, `&` that could begin an entity,
+// or the structural JSX tokens `<`/`{`/`>`/`}`) must be emitted as a
+// JSX expression so the JS lexer parses it instead.
+const JSX_ATTRIBUTE_STRING_UNSAFE = /[\n\r\t\u2028\u2029\\&<>{}]/;
+
+function needsJsxExpressionForm(value: string): boolean {
+	return JSX_ATTRIBUTE_STRING_UNSAFE.test(value);
+}
+
+function escapeStringForAttribute(value: string): string {
+	// Safe path: no characters that JSX attribute-string mode mishandles.
+	// Only `"` itself needs escaping for the surrounding double-quote
+	// delimiter.
+	return value.replace(/"/g, "&quot;");
 }
 
 /**
@@ -82,7 +91,10 @@ export function serializeProp(
 
 	switch (typeof value) {
 		case "string":
-			return { value: `"${escapeStringForJsx(value)}"`, warnings: [] };
+			if (needsJsxExpressionForm(value)) {
+				return { value: `{${JSON.stringify(value)}}`, warnings: [] };
+			}
+			return { value: `"${escapeStringForAttribute(value)}"`, warnings: [] };
 		case "number":
 			return {
 				value: Number.isFinite(value) ? `{${String(value)}}` : "{null}",

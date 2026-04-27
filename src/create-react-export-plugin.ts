@@ -7,7 +7,7 @@ import type {
 import { resolveReactAssetUrls } from "./assets.js";
 import { emitReact } from "./emitter.js";
 import { reactFormat } from "./format-definition.js";
-import { exportReactHeaderAction } from "./header-action.js";
+import { createExportReactHeaderAction } from "./header-action.js";
 import {
 	type ReactExportOptions,
 	resolveReactExportOptions,
@@ -17,7 +17,7 @@ const reactExportPluginMeta: StudioPluginMeta = {
 	id: "anvilkit-plugin-export-react",
 	name: "React Export",
 	version: "1.0.0-beta.0",
-	coreVersion: "^0.1.0-alpha",
+	coreVersion: "^0.1.0-alpha.0",
 	description: "Export Puck pages as React (.tsx / .jsx) source files.",
 };
 
@@ -25,7 +25,11 @@ const reactExportPluginMeta: StudioPluginMeta = {
  * Build the `StudioPlugin` object for the React export format.
  *
  * The returned plugin contributes exactly one export format
- * (`id: "react"`) and one header action (`id: "export-react"`).
+ * (`id: "react"`) and one header action (`id: "export-react"`). The
+ * header action is bound to the same options passed here, so a host
+ * supplying `buildIR` gets an action that runs the export end-to-end
+ * and broadcasts `anvilkit:export:ready`; without `buildIR` the action
+ * broadcasts `anvilkit:export:request` for the host to handle.
  *
  * Options passed here become the plugin-level defaults. Caller-supplied
  * options at `exportAs("react", opts)` time shallow-merge on top, so
@@ -35,10 +39,10 @@ const reactExportPluginMeta: StudioPluginMeta = {
  * `runtime.exportFormats.get("react") === reactFormat`.
  */
 export function createReactExportPlugin(
-	opts?: ReactExportOptions,
+	opts: ReactExportOptions = {},
 ): StudioPlugin {
 	const format: ExportFormatDefinition<ReactExportOptions> =
-		opts === undefined || Object.keys(opts).length === 0
+		Object.keys(opts).length === 0
 			? reactFormat
 			: {
 					...reactFormat,
@@ -64,13 +68,15 @@ export function createReactExportPlugin(
 					},
 				};
 
+	const headerAction = createExportReactHeaderAction(format, opts);
+
 	return {
 		meta: reactExportPluginMeta,
 		register(_ctx) {
 			return {
 				meta: reactExportPluginMeta,
 				exportFormats: [format],
-				headerActions: [exportReactHeaderAction],
+				headerActions: [headerAction],
 			};
 		},
 	};

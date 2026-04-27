@@ -1,4 +1,20 @@
-import type { ExportWarning } from "@anvilkit/core/types";
+import type {
+	ExportWarning,
+	PageIR,
+	StudioPluginContext,
+} from "@anvilkit/core/types";
+
+/**
+ * Build a {@link PageIR} from the live Studio context. Supplied by the
+ * host so the React export header action can run end-to-end without the
+ * plugin needing access to the host's Puck `Config`.
+ *
+ * Hosts typically implement this with `puckDataToIR(ctx.getData(),
+ * puckConfig)` from `@anvilkit/ir`.
+ */
+export type IRBuilder = (
+	ctx: StudioPluginContext,
+) => PageIR | Promise<PageIR>;
 
 /**
  * Public options bag for `@anvilkit/plugin-export-react`.
@@ -36,6 +52,15 @@ export interface ReactExportOptions extends Record<string, unknown> {
 	 *   `"url-prop"` behavior under this strategy (with a warning).
 	 */
 	readonly assetStrategy?: "static-import" | "url-prop";
+	/**
+	 * Optional builder used by the export header action to obtain a
+	 * {@link PageIR} from the live Studio context. When provided, the
+	 * action runs the format and broadcasts an `anvilkit:export:ready`
+	 * event with the resulting payload. When omitted, the action falls
+	 * back to broadcasting an `anvilkit:export:request` event so the
+	 * host can perform the export itself.
+	 */
+	readonly buildIR?: IRBuilder;
 }
 
 /**
@@ -83,13 +108,11 @@ export function resolveReactExportOptions(
  *
  * - `"named"` → `import { Hero } from "@anvilkit/hero";`
  * - `"default"` → `import Hero from "@anvilkit/hero";`
- * - `"sideEffect"` → `import "@anvilkit/hero";` (used for asset
- *   imports alongside a default binding — see `collect-imports.ts`).
  */
 export interface ImportRecord {
 	readonly binding: string;
 	readonly source: string;
-	readonly kind: "named" | "default" | "sideEffect";
+	readonly kind: "named" | "default";
 }
 
 /**
