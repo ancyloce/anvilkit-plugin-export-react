@@ -8,10 +8,7 @@ import { resolveReactAssetUrls } from "./assets.js";
 import { emitReact } from "./emitter.js";
 import { reactFormat } from "./format-definition.js";
 import { createExportReactHeaderAction } from "./header-action.js";
-import {
-	type ReactExportOptions,
-	resolveReactExportOptions,
-} from "./types.js";
+import { type ReactExportOptions, resolveReactExportOptions } from "./types.js";
 
 const reactExportPluginMeta: StudioPluginMeta = {
 	id: "anvilkit-plugin-export-react",
@@ -51,13 +48,8 @@ export function createReactExportPlugin(
 							...opts,
 							...callOptions,
 						});
-						const {
-							ir: resolvedIr,
-							warnings: resolutionWarnings,
-						} = await resolveReactAssetUrls(
-							ir,
-							runCtx?.assetResolvers ?? [],
-						);
+						const { ir: resolvedIr, warnings: resolutionWarnings } =
+							await resolveReactAssetUrls(ir, runCtx?.assetResolvers ?? []);
 						const { code, warnings } = emitReact(resolvedIr, resolved);
 						const extension = resolved.syntax === "jsx" ? "jsx" : "tsx";
 						return {

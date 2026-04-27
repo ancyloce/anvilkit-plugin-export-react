@@ -1,6 +1,10 @@
 import type { ExportWarning, PageIR, PageIRNode } from "@anvilkit/core/types";
 
-import { type AssetRewrite, collectReactAssets, isAssetPropKey } from "./assets.js";
+import {
+	type AssetRewrite,
+	collectReactAssets,
+	isAssetPropKey,
+} from "./assets.js";
 import { collectImports } from "./collect-imports.js";
 import { serializeProp } from "./serialize-prop.js";
 import type {
@@ -14,7 +18,7 @@ const ROOT_TYPE = "__root__";
 const SUPPORTED_IR_VERSION = "1";
 const INDENT = "  ";
 
-const VALID_JSX_TAG = /^[A-Z][A-Za-z0-9]*(?:\.[A-Z][A-Za-z0-9]*)*$/;
+const VALID_JSX_TAG = /^[A-Z][A-Za-z0-9]*$/;
 const VALID_JSX_ATTR = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 
 // Threshold (in characters of the inline prop segment) above which props
@@ -33,7 +37,10 @@ function indent(depth: number): string {
 	return INDENT.repeat(depth);
 }
 
-function renderImport(record: ImportRecord, moduleSystem: "esm" | "cjs"): string {
+function renderImport(
+	record: ImportRecord,
+	moduleSystem: "esm" | "cjs",
+): string {
 	if (moduleSystem === "cjs") {
 		if (record.kind === "default") {
 			return `const ${record.binding} = require(${JSON.stringify(record.source)});`;
@@ -78,14 +85,10 @@ function renderAttribute(
 		return null;
 	}
 
-	if (
-		ctx.opts.assetStrategy === "static-import" &&
-		isAssetPropKey(key) &&
-		typeof value === "string"
-	) {
-		const rewrite = ctx.assetRewrites.get(value);
-		if (rewrite) {
-			return `${key}={${rewrite.binding}}`;
+	if (ctx.opts.assetStrategy === "static-import") {
+		const rewritten = serializePropWithAssetRewrites(key, value, nodeId, ctx);
+		if (rewritten !== null) {
+			return `${key}=${rewritten}`;
 		}
 	}
 
@@ -94,6 +97,113 @@ function renderAttribute(
 		ctx.warnings.push(warning);
 	}
 	return `${key}=${serialized.value}`;
+}
+
+function serializePropWithAssetRewrites(
+	key: string,
+	value: unknown,
+	nodeId: string,
+	ctx: EmitContext,
+): string | null {
+	if (!hasAssetRewrite(value, key, ctx.assetRewrites, new WeakSet())) {
+		return null;
+	}
+
+	const serialized = serializeProp(value, { nodeId, propName: key });
+	for (const warning of serialized.warnings) {
+		ctx.warnings.push(warning);
+	}
+	if (serialized.warnings.length > 0) {
+		return serialized.value;
+	}
+
+	return `{${serializeJsExpressionWithAssetRewrites(
+		value,
+		key,
+		ctx.assetRewrites,
+	)}}`;
+}
+
+function hasAssetRewrite(
+	value: unknown,
+	key: string | undefined,
+	assetRewrites: ReadonlyMap<string, AssetRewrite>,
+	seen: WeakSet<object>,
+): boolean {
+	if (Array.isArray(value)) {
+		if (seen.has(value)) {
+			return false;
+		}
+		seen.add(value);
+		return value.some((entry) =>
+			hasAssetRewrite(entry, undefined, assetRewrites, seen),
+		);
+	}
+
+	if (typeof value === "string") {
+		return key !== undefined && isAssetPropKey(key) && assetRewrites.has(value);
+	}
+
+	if (value === null || typeof value !== "object") {
+		return false;
+	}
+	if (seen.has(value)) {
+		return false;
+	}
+	seen.add(value);
+
+	return Object.entries(value as Record<string, unknown>).some(
+		([entryKey, entryValue]) =>
+			hasAssetRewrite(entryValue, entryKey, assetRewrites, seen),
+	);
+}
+
+function serializeJsExpressionWithAssetRewrites(
+	value: unknown,
+	key: string | undefined,
+	assetRewrites: ReadonlyMap<string, AssetRewrite>,
+): string {
+	if (value === null) {
+		return "null";
+	}
+
+	switch (typeof value) {
+		case "string": {
+			const rewrite =
+				key !== undefined && isAssetPropKey(key)
+					? assetRewrites.get(value)
+					: undefined;
+			return rewrite ? rewrite.binding : JSON.stringify(value);
+		}
+		case "number":
+			return Number.isFinite(value) ? String(value) : "null";
+		case "boolean":
+			return value ? "true" : "false";
+		case "object":
+			if (Array.isArray(value)) {
+				return `[${value
+					.map((entry) =>
+						serializeJsExpressionWithAssetRewrites(
+							entry,
+							undefined,
+							assetRewrites,
+						),
+					)
+					.join(",")}]`;
+			}
+			return `{${Object.entries(value as Record<string, unknown>)
+				.map(
+					([entryKey, entryValue]) =>
+						`${JSON.stringify(entryKey)}:${serializeJsExpressionWithAssetRewrites(
+							entryValue,
+							entryKey,
+							assetRewrites,
+						)}`,
+				)
+				.join(",")}}`;
+		default:
+			return "null";
+	}
 }
 
 function renderProps(
@@ -112,9 +222,10 @@ function renderProps(
 
 	const inline = parts.length > 0 ? ` ${parts.join(" ")}` : "";
 	const blockIndent = indent(depth + 1);
-	const block = parts.length > 0
-		? `\n${parts.map((part) => `${blockIndent}${part}`).join("\n")}\n${indent(depth)}`
-		: "";
+	const block =
+		parts.length > 0
+			? `\n${parts.map((part) => `${blockIndent}${part}`).join("\n")}\n${indent(depth)}`
+			: "";
 	return { inline, block, count: parts.length };
 }
 
@@ -131,8 +242,7 @@ function renderNode(node: PageIRNode, depth: number, ctx: EmitContext): string {
 	}
 	const { inline, block, count } = renderProps(node, depth, ctx);
 
-	const hasChildren =
-		Array.isArray(node.children) && node.children.length > 0;
+	const hasChildren = Array.isArray(node.children) && node.children.length > 0;
 	const propSegment =
 		inline.length > MAX_INLINE_PROP_WIDTH && count > 1 ? block : inline;
 
@@ -149,11 +259,7 @@ function renderNode(node: PageIRNode, depth: number, ctx: EmitContext): string {
 	return `${pad}<${node.type}${propSegment}>\n${childCode}\n${pad}</${node.type}>`;
 }
 
-function renderBody(
-	ir: PageIR,
-	ctx: EmitContext,
-	depth: number,
-): string {
+function renderBody(ir: PageIR, ctx: EmitContext, depth: number): string {
 	const rootChildren = ir.root.children ?? [];
 	if (rootChildren.length === 0) {
 		return `${indent(depth)}<></>`;
@@ -171,8 +277,7 @@ function renderFunctionWrapper(
 	body: string,
 	opts: ResolvedReactExportOptions,
 ): string {
-	const returnTypeAnnotation =
-		opts.syntax === "tsx" ? ": JSX.Element" : "";
+	const returnTypeAnnotation = opts.syntax === "tsx" ? ": JSX.Element" : "";
 	if (opts.moduleResolution === "cjs") {
 		return [
 			`function Page()${returnTypeAnnotation} {`,
@@ -241,7 +346,7 @@ export function emitReact(
 			level: "warn",
 			code: "INVALID_OPTION_COMBINATION",
 			message:
-				"`assetStrategy: \"static-import\"` requires `includeImports: true`; falling back to \"url-prop\" semantics for assets.",
+				'`assetStrategy: "static-import"` requires `includeImports: true`; falling back to "url-prop" semantics for assets.',
 		});
 	}
 	if (opts.syntax === "tsx" && opts.moduleResolution === "cjs") {
@@ -262,7 +367,9 @@ export function emitReact(
 		assetRewrites: assetPlan.rewrites,
 	};
 
-	const importManifest = opts.includeImports ? collectImports(ir) : { imports: [] };
+	const importManifest = opts.includeImports
+		? collectImports(ir)
+		: { imports: [] };
 	const importSection = opts.includeImports
 		? renderImports(importManifest, assetPlan.imports, opts.moduleResolution)
 		: "";

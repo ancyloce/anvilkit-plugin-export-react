@@ -146,7 +146,12 @@ function serializeComposite(
 function isUnserializable(value: unknown): boolean {
 	if (value === null) return false;
 	const t = typeof value;
-	if (t === "function" || t === "symbol" || t === "bigint" || t === "undefined") {
+	if (
+		t === "function" ||
+		t === "symbol" ||
+		t === "bigint" ||
+		t === "undefined"
+	) {
 		return true;
 	}
 	if (t !== "object") return false;

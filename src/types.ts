@@ -12,9 +12,7 @@ import type {
  * Hosts typically implement this with `puckDataToIR(ctx.getData(),
  * puckConfig)` from `@anvilkit/ir`.
  */
-export type IRBuilder = (
-	ctx: StudioPluginContext,
-) => PageIR | Promise<PageIR>;
+export type IRBuilder = (ctx: StudioPluginContext) => PageIR | Promise<PageIR>;
 
 /**
  * Public options bag for `@anvilkit/plugin-export-react`.
@@ -90,13 +88,69 @@ export const REACT_EXPORT_DEFAULTS: ResolvedReactExportOptions = {
 export function resolveReactExportOptions(
 	opts?: ReactExportOptions,
 ): ResolvedReactExportOptions {
+	const syntax =
+		opts?.syntax === undefined ? REACT_EXPORT_DEFAULTS.syntax : opts.syntax;
+	assertEnumOption("syntax", syntax, ["tsx", "jsx"]);
+
+	const moduleResolution =
+		opts?.moduleResolution === undefined
+			? REACT_EXPORT_DEFAULTS.moduleResolution
+			: opts.moduleResolution;
+	assertEnumOption("moduleResolution", moduleResolution, ["esm", "cjs"]);
+
+	const includeImports =
+		opts?.includeImports === undefined
+			? REACT_EXPORT_DEFAULTS.includeImports
+			: opts.includeImports;
+	if (typeof includeImports !== "boolean") {
+		throw new TypeError(
+			`Invalid React export option "includeImports": expected a boolean, received ${describeOptionValue(
+				includeImports,
+			)}.`,
+		);
+	}
+
+	const assetStrategy =
+		opts?.assetStrategy === undefined
+			? REACT_EXPORT_DEFAULTS.assetStrategy
+			: opts.assetStrategy;
+	assertEnumOption("assetStrategy", assetStrategy, [
+		"static-import",
+		"url-prop",
+	]);
+
 	return {
-		syntax: opts?.syntax ?? REACT_EXPORT_DEFAULTS.syntax,
-		moduleResolution:
-			opts?.moduleResolution ?? REACT_EXPORT_DEFAULTS.moduleResolution,
-		includeImports: opts?.includeImports ?? REACT_EXPORT_DEFAULTS.includeImports,
-		assetStrategy: opts?.assetStrategy ?? REACT_EXPORT_DEFAULTS.assetStrategy,
+		syntax,
+		moduleResolution,
+		includeImports,
+		assetStrategy,
 	};
+}
+
+function assertEnumOption<T extends string>(
+	name: string,
+	value: unknown,
+	allowed: readonly T[],
+): asserts value is T {
+	if (typeof value === "string" && allowed.includes(value as T)) {
+		return;
+	}
+
+	throw new TypeError(
+		`Invalid React export option "${name}": expected ${allowed
+			.map((entry) => JSON.stringify(entry))
+			.join(" | ")}, received ${describeOptionValue(value)}.`,
+	);
+}
+
+function describeOptionValue(value: unknown): string {
+	if (typeof value === "string") {
+		return JSON.stringify(value);
+	}
+	if (typeof value === "undefined") {
+		return "undefined";
+	}
+	return `${typeof value} ${JSON.stringify(value)}`;
 }
 
 /**

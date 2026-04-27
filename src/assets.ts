@@ -99,7 +99,9 @@ function sanitizeForIdent(input: string): string {
 }
 
 function isExternalUrl(url: string): boolean {
-	return /^(?:https?:|\/\/|data:|blob:|file:|javascript:)/i.test(url);
+	return /^(?:https?:|\/\/|data:|blob:|file:|filesystem:|javascript:)/i.test(
+		url,
+	);
 }
 
 function hasTraversalSegment(url: string): boolean {
@@ -169,8 +171,7 @@ export async function resolveReactAssetUrls(
 						warning: {
 							level: "warn",
 							code: "ASSET_UNRESOLVED",
-							message:
-								`Asset "${assetId}" resolved to a disallowed URL during React export and was omitted.`,
+							message: `Asset "${assetId}" resolved to a disallowed URL during React export and was omitted.`,
 							...(info.nodeId ? { nodeId: info.nodeId } : {}),
 						},
 					};
@@ -219,7 +220,7 @@ export async function resolveReactAssetUrls(
 		assets: ir.assets
 			.map((asset) => cloneAsset(asset, rewrittenUrls, blockedUrls))
 			.filter((asset): asset is PageIRAsset => asset !== null),
-		metadata: { ...ir.metadata },
+		metadata: cloneDetachedObject(ir.metadata),
 	};
 
 	return {
@@ -230,26 +231,63 @@ export async function resolveReactAssetUrls(
 
 /**
  * Walk a node's props and yield every `(nodeId, propName, url)` triple
- * where the prop key matches an asset-shaped key and the value is a
- * non-empty string.
+ * where an asset-shaped key contains a non-empty string, including
+ * nested objects/arrays.
  */
-function* walkAssetProps(
-	node: PageIRNode,
-): IterableIterator<{
+function* walkAssetProps(node: PageIRNode): IterableIterator<{
 	readonly nodeId: string;
 	readonly propName: string;
 	readonly url: string;
 }> {
 	const nodeId = node.id;
-	for (const [key, value] of Object.entries(node.props)) {
-		if (isAssetProp(key) && typeof value === "string" && value !== "") {
-			yield { nodeId, propName: key, url: value };
-		}
-	}
+	yield* walkAssetValue(node.props, nodeId, undefined, new WeakSet());
 	if (node.children) {
 		for (const child of node.children) {
 			yield* walkAssetProps(child);
 		}
+	}
+}
+
+function* walkAssetValue(
+	value: unknown,
+	nodeId: string,
+	key?: string,
+	seen: WeakSet<object> = new WeakSet(),
+): IterableIterator<{
+	readonly nodeId: string;
+	readonly propName: string;
+	readonly url: string;
+}> {
+	if (Array.isArray(value)) {
+		if (seen.has(value)) {
+			return;
+		}
+		seen.add(value);
+		for (const entry of value) {
+			yield* walkAssetValue(entry, nodeId, undefined, seen);
+		}
+		return;
+	}
+
+	if (typeof value === "string") {
+		if (key !== undefined && isAssetProp(key) && value !== "") {
+			yield { nodeId, propName: key, url: value };
+		}
+		return;
+	}
+
+	if (value === null || typeof value !== "object") {
+		return;
+	}
+	if (seen.has(value)) {
+		return;
+	}
+	seen.add(value);
+
+	for (const [entryKey, entryValue] of Object.entries(
+		value as Record<string, unknown>,
+	)) {
+		yield* walkAssetValue(entryValue, nodeId, entryKey, seen);
 	}
 }
 
@@ -260,11 +298,7 @@ function* walkAssetProps(
  * stable across runs without colliding on common filenames.
  */
 function deriveBindingName(url: string): string {
-	const basename = url
-		.split(/[?#]/, 1)[0]
-		?.split("/")
-		.filter(Boolean)
-		.pop();
+	const basename = url.split(/[?#]/, 1)[0]?.split("/").filter(Boolean).pop();
 	const stem = sanitizeForIdent((basename ?? "asset").replace(/\.[^.]+$/, ""));
 	const hash = fnv1a(url);
 	if (stem === "") {
@@ -409,7 +443,7 @@ function walkNodeForAssetReferences(
 				kind: current?.kind ?? asset.kind,
 				nodeId: current?.nodeId ?? node.id,
 				allowSafeDataImage:
-					current?.allowSafeDataImage ?? (asset.kind === "image"),
+					current?.allowSafeDataImage ?? asset.kind === "image",
 			});
 		}
 	}
@@ -466,11 +500,9 @@ function cloneNode(
 	return {
 		id: node.id,
 		type: node.type,
-		props: cloneValue(
-			node.props,
-			rewrittenUrls,
-			blockedUrls,
-		) as Readonly<Record<string, unknown>>,
+		props: cloneValue(node.props, rewrittenUrls, blockedUrls) as Readonly<
+			Record<string, unknown>
+		>,
 		...(node.children
 			? {
 					children: node.children.map((child) =>
@@ -501,7 +533,7 @@ function cloneAsset(
 		id: asset.id,
 		kind: asset.kind,
 		url: rewrittenUrls.get(asset.url) ?? asset.url,
-		...(asset.meta ? { meta: asset.meta } : {}),
+		...(asset.meta ? { meta: cloneDetachedObject(asset.meta) } : {}),
 	};
 }
 
@@ -556,10 +588,15 @@ function normalizeResolvedAssetUrl(
 	}
 
 	const collapsed = stripUnsafeAscii(candidate).toLowerCase();
-	if (collapsed.startsWith("javascript:") || collapsed.startsWith("vbscript:")) {
+	if (collapsed.startsWith("//")) {
 		return undefined;
 	}
 
+	const schemeMatch = collapsed.match(/^([a-z][a-z0-9+.-]*):/i);
+	const scheme = schemeMatch?.[1];
+	if (scheme && scheme !== "http" && scheme !== "https" && scheme !== "data") {
+		return undefined;
+	}
 	if (
 		collapsed.startsWith("data:") &&
 		(!options.allowSafeDataImage || !isSafeDataImageUrl(candidate))
@@ -595,7 +632,10 @@ function parseAssetId(url: string): string | null {
 	return assetId === "" ? null : assetId;
 }
 
-function makeUnresolvedWarning(assetId: string, nodeId?: string): ExportWarning {
+function makeUnresolvedWarning(
+	assetId: string,
+	nodeId?: string,
+): ExportWarning {
 	return {
 		level: "warn",
 		code: "ASSET_UNRESOLVED",
@@ -625,4 +665,38 @@ function deepFreeze<T>(value: T): T {
 	}
 
 	return value;
+}
+
+function cloneDetachedObject<T extends object>(value: T): T {
+	return cloneDetachedValue(value, new WeakMap()) as T;
+}
+
+function cloneDetachedValue(
+	value: unknown,
+	seen: WeakMap<object, unknown>,
+): unknown {
+	if (value === null || typeof value !== "object") {
+		return value;
+	}
+
+	const existing = seen.get(value);
+	if (existing !== undefined) {
+		return existing;
+	}
+
+	if (Array.isArray(value)) {
+		const next: unknown[] = [];
+		seen.set(value, next);
+		for (const entry of value) {
+			next.push(cloneDetachedValue(entry, seen));
+		}
+		return next;
+	}
+
+	const next: Record<string, unknown> = {};
+	seen.set(value, next);
+	for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+		next[key] = cloneDetachedValue(entry, seen);
+	}
+	return next;
 }
