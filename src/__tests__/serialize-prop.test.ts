@@ -9,19 +9,34 @@ describe("serializeProp — primitives", () => {
 		expect(result.warnings).toEqual([]);
 	});
 
-	it("escapes double quotes inside string values", () => {
+	it("escapes double quotes inside string values as &quot; (HTML-entity decoded by JSX)", () => {
 		const result = serializeProp('he said "hi"');
-		expect(result.value).toBe('"he said \\"hi\\""');
+		expect(result.value).toBe('"he said &quot;hi&quot;"');
 	});
 
-	it("escapes newline, carriage return, and tab", () => {
+	it("emits newline, carriage return, and tab inside a JSX expression so escapes are honored", () => {
 		const result = serializeProp("a\nb\rc\td");
-		expect(result.value).toBe('"a\\nb\\rc\\td"');
+		expect(result.value).toBe(`{${JSON.stringify("a\nb\rc\td")}}`);
 	});
 
-	it("escapes U+2028 and U+2029 line separators", () => {
+	it("emits U+2028 and U+2029 line separators inside a JSX expression", () => {
 		const result = serializeProp("a\u2028b\u2029c");
-		expect(result.value).toBe('"a\\u2028b\\u2029c"');
+		expect(result.value).toBe(`{${JSON.stringify("a\u2028b\u2029c")}}`);
+	});
+
+	it("emits backslashes inside a JSX expression so they survive JSX attribute mode", () => {
+		const result = serializeProp("C:\\Users\\file");
+		expect(result.value).toBe(`{${JSON.stringify("C:\\Users\\file")}}`);
+	});
+
+	it("emits HTML-entity-shaped text inside a JSX expression so JSX cannot decode it", () => {
+		const result = serializeProp("Tom &amp; Jerry");
+		expect(result.value).toBe(`{${JSON.stringify("Tom &amp; Jerry")}}`);
+	});
+
+	it("emits angle/brace tokens inside a JSX expression so the JSX parser cannot misread them", () => {
+		expect(serializeProp("<script>").value).toBe(`{${JSON.stringify("<script>")}}`);
+		expect(serializeProp("a {b} c").value).toBe(`{${JSON.stringify("a {b} c")}}`);
 	});
 
 	it("emits numbers inside JSX expression braces", () => {

@@ -38,7 +38,7 @@ describe("createReactExportPlugin registration", () => {
 		expect(plugin.meta.id).toBe("anvilkit-plugin-export-react");
 		expect(plugin.meta.name).toBe("React Export");
 		expect(plugin.meta.version).toBe("1.0.0-beta.0");
-		expect(plugin.meta.coreVersion).toBe("^0.1.0-alpha");
+		expect(plugin.meta.coreVersion).toBe("^0.1.0-alpha.0");
 	});
 
 	it("runs the registered react format and returns page.tsx", async () => {
