@@ -72,13 +72,17 @@ async function prepareEntry(packageName) {
 	);
 }
 
-async function bundle(packageName, peerDependencies) {
+async function bundle(packageName, peerDependencies, dependencies) {
 	const platform = packageName.startsWith("@anvilkit/plugin-")
 		? "browser"
 		: "node";
+	// The budget measures *this* package's own code only — every peer or
+	// regular dependency is the consumer's installed copy and must be
+	// excluded so esbuild does not pull it into the gzipped bundle.
 	const external = [
 		...new Set([
 			...Object.keys(peerDependencies),
+			...Object.keys(dependencies),
 			"react/jsx-runtime",
 			"react/jsx-dev-runtime",
 		]),
@@ -128,7 +132,11 @@ async function main() {
 	await ensureDistExists();
 	await prepareEntry(pkg.name);
 
-	const metafile = await bundle(pkg.name, pkg.peerDependencies ?? {});
+	const metafile = await bundle(
+		pkg.name,
+		pkg.peerDependencies ?? {},
+		pkg.dependencies ?? {},
+	);
 	const entryChunkPath = findEntryChunk(metafile);
 	const raw = await readFile(entryChunkPath);
 	const gzipped = gzipSync(raw, { level: 9 });
