@@ -39,7 +39,7 @@
 	},
 	"peerDependencies": {
 		"react": "^18.2.0",
-		"@puckeditor/core": "^0.21.0",
+		"@puckeditor/core": "^0.21.2",
 		"@anvilkit/core": "^0.1.0-alpha.0"
 	},
 	"peerDependenciesMeta": {
