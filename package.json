@@ -1,6 +1,6 @@
 {
 	"name": "@anvilkit/plugin-export-react",
-	"version": "1.0.0-beta.0",
+	"version": "0.1.1",
 	"description": "React (.tsx/.jsx) export format for Anvilkit Studio — emits React source from PageIR.",
 	"type": "module",
 	"main": "./dist/index.cjs",
@@ -40,7 +40,7 @@
 	"peerDependencies": {
 		"react": "^18.2.0",
 		"@puckeditor/core": "^0.21.2",
-		"@anvilkit/core": "^0.1.0-alpha.0"
+		"@anvilkit/core": "^0.1.1"
 	},
 	"peerDependenciesMeta": {
 		"react": {
