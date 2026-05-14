@@ -38,9 +38,9 @@
 		"access": "public"
 	},
 	"peerDependencies": {
-		"react": "^18.2.0",
+		"@anvilkit/core": "^0.1.1",
 		"@puckeditor/core": "^0.21.2",
-		"@anvilkit/core": "^0.1.1"
+		"react": "^18.2.0"
 	},
 	"peerDependenciesMeta": {
 		"react": {
@@ -53,7 +53,6 @@
 			"optional": false
 		}
 	},
-	"dependencies": {},
 	"scripts": {
 		"build": "rslib build",
 		"dev": "rslib build --watch",
@@ -75,7 +74,7 @@
 		"@anvilkit/core": "workspace:*",
 		"@anvilkit/typescript-config": "workspace:*",
 		"@anvilkit/vitest-config": "workspace:*",
-		"@puckeditor/core": "^0.21.1",
+		"@puckeditor/core": "^0.21.2",
 		"@rslib/core": "^0.20.1",
 		"@types/node": "^22.15.3",
 		"@typescript-eslint/typescript-estree": "^8.0.0",
