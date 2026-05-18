@@ -2,8 +2,9 @@ import { compilePlugins, StudioConfigSchema } from "@anvilkit/core";
 import type { StudioPluginContext } from "@anvilkit/core/types";
 import { describe, expect, it, vi } from "vitest";
 
-import { createReactExportPlugin } from "../index.js";
+import packageJson from "../../package.json";
 import { heroFixture } from "./__fixtures__/hero.fixture.js";
+import { createReactExportPlugin } from "../index.js";
 
 const studioConfig = StudioConfigSchema.parse({});
 
@@ -39,11 +40,11 @@ describe("createReactExportPlugin registration", () => {
 		).toBe(true);
 	});
 
-	it("exposes plugin meta with a stable id and beta version", () => {
+	it("exposes plugin meta with a stable id and package.json version", () => {
 		const plugin = createReactExportPlugin();
 		expect(plugin.meta.id).toBe("anvilkit-plugin-export-react");
 		expect(plugin.meta.name).toBe("React Export");
-		expect(plugin.meta.version).toBe("1.0.0-beta.0");
+		expect(plugin.meta.version).toBe(packageJson.version);
 		expect(plugin.meta.coreVersion).toBe("^0.1.0-alpha.0");
 	});
 
