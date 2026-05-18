@@ -7,7 +7,7 @@ component imports from the `@anvilkit/<slug>` packages, JSX with
 serialized props, and — optionally — `import` statements for any
 referenced local assets so Vite/Next can hash and fingerprint them.
 
-> **Beta status (`1.0.0-beta.0`).** The surface is implemented and
+> **Alpha status (`0.1.2`).** The surface is implemented and
 > tested; the emitted JSX contract may still evolve before `1.0.0`.
 
 ## Install
@@ -128,5 +128,5 @@ asserting `result.warnings.length === 0` for known-clean fixtures.
 | Package | Version |
 | ------- | ------- |
 | `react` | `^18.2.0` |
-| `@puckeditor/core` | `^0.21.0` |
-| `@anvilkit/core` | `^0.1.0-alpha.0` |
+| `@puckeditor/core` | `^0.21.2` |
+| `@anvilkit/core` | `^0.1.2` |

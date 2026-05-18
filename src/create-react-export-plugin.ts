@@ -4,6 +4,7 @@ import type {
 	StudioPluginMeta,
 } from "@anvilkit/core/types";
 
+import packageJson from "../package.json";
 import { resolveReactAssetUrls } from "./assets.js";
 import { emitReact } from "./emitter.js";
 import { reactFormat } from "./format-definition.js";
@@ -13,7 +14,9 @@ import { type ReactExportOptions, resolveReactExportOptions } from "./types.js";
 const reactExportPluginMeta: StudioPluginMeta = {
 	id: "anvilkit-plugin-export-react",
 	name: "React Export",
-	version: "1.0.0-beta.0",
+	// Derived from package.json so a Changesets bump can never drift the
+	// runtime metadata; the metadata-drift test guards regressions.
+	version: packageJson.version,
 	coreVersion: "^0.1.0-alpha.0",
 	description: "Export Puck pages as React (.tsx / .jsx) source files.",
 };
