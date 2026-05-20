@@ -9,33 +9,33 @@ import { defineConfig } from "@rslib/core";
  * install exactly one copy.
  */
 export default defineConfig({
-	source: {
-		entry: {
-			index: [
-				"./src/**/*.ts",
-				"!./src/**/*.{test,spec}.ts",
-				"!./src/**/__tests__/**",
-			],
-		},
-	},
-	lib: [
-		{
-			bundle: false,
-			dts: {
-				autoExtension: true,
-			},
-			format: "esm",
-		},
-		{
-			bundle: false,
-			dts: {
-				autoExtension: true,
-			},
-			format: "cjs",
-		},
-	],
-	output: {
-		target: "node",
-		externals: ["@anvilkit/core", "@puckeditor/core", "react"],
-	},
+  source: {
+    entry: {
+      index: [
+        "./src/**/*.ts",
+        "!./src/**/*.{test,spec}.ts",
+        "!./src/**/__tests__/**",
+      ],
+    },
+  },
+  lib: [
+    {
+      bundle: false,
+      dts: {
+        autoExtension: true,
+      },
+      format: "esm",
+    },
+    {
+      bundle: false,
+      dts: {
+        autoExtension: true,
+      },
+      format: "cjs",
+    },
+  ],
+  output: {
+    target: "node",
+    externals: ["@anvilkit/core", "@puckeditor/core", "react"],
+  },
 });

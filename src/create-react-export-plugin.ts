@@ -1,7 +1,7 @@
 import type {
-	ExportFormatDefinition,
-	StudioPlugin,
-	StudioPluginMeta,
+  ExportFormatDefinition,
+  StudioPlugin,
+  StudioPluginMeta,
 } from "@anvilkit/core/types";
 
 import packageJson from "../package.json";
@@ -12,13 +12,13 @@ import { createExportReactHeaderAction } from "./header-action.js";
 import { type ReactExportOptions, resolveReactExportOptions } from "./types.js";
 
 const reactExportPluginMeta: StudioPluginMeta = {
-	id: "anvilkit-plugin-export-react",
-	name: "React Export",
-	// Derived from package.json so a Changesets bump can never drift the
-	// runtime metadata; the metadata-drift test guards regressions.
-	version: packageJson.version,
-	coreVersion: "^0.1.0-alpha.0",
-	description: "Export Puck pages as React (.tsx / .jsx) source files.",
+  id: "anvilkit-plugin-export-react",
+  name: "React Export",
+  // Derived from package.json so a Changesets bump can never drift the
+  // runtime metadata; the metadata-drift test guards regressions.
+  version: packageJson.version,
+  coreVersion: "^0.1.0-alpha.0",
+  description: "Export Puck pages as React (.tsx / .jsx) source files.",
 };
 
 /**
@@ -39,40 +39,40 @@ const reactExportPluginMeta: StudioPluginMeta = {
  * `runtime.exportFormats.get("react") === reactFormat`.
  */
 export function createReactExportPlugin(
-	opts: ReactExportOptions = {},
+  opts: ReactExportOptions = {},
 ): StudioPlugin {
-	const format: ExportFormatDefinition<ReactExportOptions> =
-		Object.keys(opts).length === 0
-			? reactFormat
-			: {
-					...reactFormat,
-					run: async (ir, callOptions, runCtx) => {
-						const resolved = resolveReactExportOptions({
-							...opts,
-							...callOptions,
-						});
-						const { ir: resolvedIr, warnings: resolutionWarnings } =
-							await resolveReactAssetUrls(ir, runCtx?.assetResolvers ?? []);
-						const { code, warnings } = emitReact(resolvedIr, resolved);
-						const extension = resolved.syntax === "jsx" ? "jsx" : "tsx";
-						return {
-							content: code,
-							filename: `page.${extension}`,
-							warnings: [...resolutionWarnings, ...warnings],
-						};
-					},
-				};
+  const format: ExportFormatDefinition<ReactExportOptions> =
+    Object.keys(opts).length === 0
+      ? reactFormat
+      : {
+          ...reactFormat,
+          run: async (ir, callOptions, runCtx) => {
+            const resolved = resolveReactExportOptions({
+              ...opts,
+              ...callOptions,
+            });
+            const { ir: resolvedIr, warnings: resolutionWarnings } =
+              await resolveReactAssetUrls(ir, runCtx?.assetResolvers ?? []);
+            const { code, warnings } = emitReact(resolvedIr, resolved);
+            const extension = resolved.syntax === "jsx" ? "jsx" : "tsx";
+            return {
+              content: code,
+              filename: `page.${extension}`,
+              warnings: [...resolutionWarnings, ...warnings],
+            };
+          },
+        };
 
-	const headerAction = createExportReactHeaderAction(format, opts);
+  const headerAction = createExportReactHeaderAction(format, opts);
 
-	return {
-		meta: reactExportPluginMeta,
-		register(_ctx) {
-			return {
-				meta: reactExportPluginMeta,
-				exportFormats: [format],
-				headerActions: [headerAction],
-			};
-		},
-	};
+  return {
+    meta: reactExportPluginMeta,
+    register(_ctx) {
+      return {
+        meta: reactExportPluginMeta,
+        exportFormats: [format],
+        headerActions: [headerAction],
+      };
+    },
+  };
 }

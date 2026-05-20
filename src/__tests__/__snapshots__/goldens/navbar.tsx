@@ -4,7 +4,10 @@ export default function Page(): JSX.Element {
   return (
     <Navbar
       brand="Anvilkit"
-      links={[{"label":"Docs","href":"/docs"},{"label":"Pricing","href":"/pricing"}]}
+      links={[
+        { label: "Docs", href: "/docs" },
+        { label: "Pricing", href: "/pricing" },
+      ]}
     />
   );
 }

@@ -15,21 +15,21 @@ const VALID_COMPONENT_TYPE = /^[A-Z][A-Za-z0-9]*$/;
  * naming convention.
  */
 export function componentTypeToPackageSlug(type: string): string {
-	return type
-		.replace(/([a-z0-9])([A-Z])/g, "$1-$2")
-		.replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")
-		.toLowerCase();
+  return type
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")
+    .toLowerCase();
 }
 
 function collectTypes(node: PageIRNode, out: Set<string>): void {
-	if (node.type !== ROOT_TYPE && VALID_COMPONENT_TYPE.test(node.type)) {
-		out.add(node.type);
-	}
-	if (node.children) {
-		for (const child of node.children) {
-			collectTypes(child, out);
-		}
-	}
+  if (node.type !== ROOT_TYPE && VALID_COMPONENT_TYPE.test(node.type)) {
+    out.add(node.type);
+  }
+  if (node.children) {
+    for (const child of node.children) {
+      collectTypes(child, out);
+    }
+  }
 }
 
 /**
@@ -46,16 +46,16 @@ function collectTypes(node: PageIRNode, out: Set<string>): void {
  * across runs.
  */
 export function collectImports(ir: PageIR): ImportManifest {
-	const types = new Set<string>();
-	collectTypes(ir.root, types);
+  const types = new Set<string>();
+  collectTypes(ir.root, types);
 
-	const records: ImportRecord[] = [...types]
-		.map<ImportRecord>((type) => ({
-			binding: type,
-			source: `@anvilkit/${componentTypeToPackageSlug(type)}`,
-			kind: "named",
-		}))
-		.sort((a, b) => (a.source < b.source ? -1 : a.source > b.source ? 1 : 0));
+  const records: ImportRecord[] = [...types]
+    .map<ImportRecord>((type) => ({
+      binding: type,
+      source: `@anvilkit/${componentTypeToPackageSlug(type)}`,
+      kind: "named",
+    }))
+    .sort((a, b) => (a.source < b.source ? -1 : a.source > b.source ? 1 : 0));
 
-	return { imports: records };
+  return { imports: records };
 }
