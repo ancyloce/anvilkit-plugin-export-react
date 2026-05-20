@@ -300,4 +300,4 @@ Browsers cannot meaningfully render `.tsx` source on download — the emitted fi
 ### See also
 
 - [`@anvilkit/plugin-export-html`](../plugin-export-html/README.md) — standalone HTML output for the same `PageIR`.
-- [`docs/architecture/export-pipeline.md`](../../../docs/architecture/export-pipeline.md) — shared export-plugin contract.
+- The `export-pipeline` architecture doc on the Anvilkit docs site — shared export-plugin contract.
