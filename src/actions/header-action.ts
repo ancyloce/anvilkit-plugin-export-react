@@ -1,19 +1,19 @@
 import type {
-  ExportFormatDefinition,
-  StudioHeaderAction,
-  StudioPluginContext,
+	ExportFormatDefinition,
+	StudioHeaderAction,
+	StudioPluginContext,
 } from "@anvilkit/core/types";
 
-import type { IRBuilder, ReactExportOptions } from "./types/types.js";
+import type { IRBuilder, ReactExportOptions } from "../types/types.js";
 
 // Convention shared with `@anvilkit/plugin-export-html` (order: 100).
 // Bump the next export plugin to 120 to keep the toolbar ordering stable.
 const DEFAULT_HEADER_ACTION: Omit<StudioHeaderAction, "onClick"> = {
-  id: "export-react",
-  label: "Export React",
-  icon: "code",
-  group: "secondary",
-  order: 110,
+	id: "export-react",
+	label: "Export React",
+	icon: "code",
+	group: "secondary",
+	order: 110,
 };
 
 /**
@@ -28,46 +28,46 @@ const DEFAULT_HEADER_ACTION: Omit<StudioHeaderAction, "onClick"> = {
  *   can perform the export end-to-end with its own Puck `Config`.
  */
 export function createExportReactHeaderAction(
-  format: ExportFormatDefinition<ReactExportOptions>,
-  options: ReactExportOptions,
+	format: ExportFormatDefinition<ReactExportOptions>,
+	options: ReactExportOptions,
 ): StudioHeaderAction {
-  const buildIR: IRBuilder | undefined = options.buildIR;
+	const buildIR: IRBuilder | undefined = options.buildIR;
 
-  return {
-    ...DEFAULT_HEADER_ACTION,
-    onClick: async (ctx: StudioPluginContext) => {
-      if (!buildIR) {
-        ctx.log(
-          "info",
-          "React export requested. Pass a buildIR option to createReactExportPlugin " +
-            "to run the export end-to-end, or listen for the anvilkit:export:request " +
-            "event to handle it from the host.",
-        );
-        ctx.emit("anvilkit:export:request", {
-          formatId: format.id,
-          options,
-        });
-        return;
-      }
+	return {
+		...DEFAULT_HEADER_ACTION,
+		onClick: async (ctx: StudioPluginContext) => {
+			if (!buildIR) {
+				ctx.log(
+					"info",
+					"React export requested. Pass a buildIR option to createReactExportPlugin " +
+						"to run the export end-to-end, or listen for the anvilkit:export:request " +
+						"event to handle it from the host.",
+				);
+				ctx.emit("anvilkit:export:request", {
+					formatId: format.id,
+					options,
+				});
+				return;
+			}
 
-      try {
-        const ir = await buildIR(ctx);
-        const result = await format.run(ir, options);
-        ctx.emit("anvilkit:export:ready", {
-          formatId: format.id,
-          content: result.content,
-          filename: result.filename,
-          mimeType: format.mimeType,
-          warnings: result.warnings,
-        });
-      } catch (error) {
-        ctx.log("error", "React export failed.", {
-          message: error instanceof Error ? error.message : String(error),
-        });
-        throw error;
-      }
-    },
-  };
+			try {
+				const ir = await buildIR(ctx);
+				const result = await format.run(ir, options);
+				ctx.emit("anvilkit:export:ready", {
+					formatId: format.id,
+					content: result.content,
+					filename: result.filename,
+					mimeType: format.mimeType,
+					warnings: result.warnings,
+				});
+			} catch (error) {
+				ctx.log("error", "React export failed.", {
+					message: error instanceof Error ? error.message : String(error),
+				});
+				throw error;
+			}
+		},
+	};
 }
 
 /**
@@ -78,13 +78,13 @@ export function createExportReactHeaderAction(
  * returned from `createExportReactHeaderAction(format, options)`.
  */
 export const exportReactHeaderAction: StudioHeaderAction = {
-  ...DEFAULT_HEADER_ACTION,
-  onClick: async (ctx) => {
-    ctx.log(
-      "info",
-      "React export requested. Use createReactExportPlugin() to obtain a header " +
-        "action wired to a concrete format and options.",
-    );
-    ctx.emit("anvilkit:export:request", { formatId: "react", options: {} });
-  },
+	...DEFAULT_HEADER_ACTION,
+	onClick: async (ctx) => {
+		ctx.log(
+			"info",
+			"React export requested. Use createReactExportPlugin() to obtain a header " +
+				"action wired to a concrete format and options.",
+		);
+		ctx.emit("anvilkit:export:request", { formatId: "react", options: {} });
+	},
 };
