@@ -4,7 +4,7 @@ import type {
   StudioPluginContext,
 } from "@anvilkit/core/types";
 
-import type { IRBuilder, ReactExportOptions } from "./types.js";
+import type { IRBuilder, ReactExportOptions } from "./types/types.js";
 
 // Convention shared with `@anvilkit/plugin-export-html` (order: 100).
 // Bump the next export plugin to 120 to keep the toolbar ordering stable.

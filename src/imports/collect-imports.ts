@@ -1,5 +1,5 @@
 import type { PageIR, PageIRNode } from "@anvilkit/core/types";
-import type { ImportManifest, ImportRecord } from "./types.js";
+import type { ImportManifest, ImportRecord } from "../types/types.js";
 
 /**
  * The root wrapper node carries `type: "__root__"` and never needs its

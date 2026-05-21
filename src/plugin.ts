@@ -8,9 +8,9 @@ import config from "../meta/config.json";
 import packageJson from "../package.json";
 import { resolveReactAssetUrls } from "./assets.js";
 import { emitReact } from "./emitter.js";
-import { reactFormat } from "./format-definition.js";
+import { reactFormat } from "./formats/format-definition.js";
 import { createExportReactHeaderAction } from "./header-action.js";
-import { type ReactExportOptions, resolveReactExportOptions } from "./types.js";
+import { type ReactExportOptions, resolveReactExportOptions } from "./types/types.js";
 
 // `version` is derived from package.json so a Changesets bump can never drift
 // the runtime metadata; `plugin.metadata-drift.test.ts` guards regressions.

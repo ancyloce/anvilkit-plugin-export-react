@@ -4,15 +4,15 @@ import {
   type AssetRewrite,
   collectReactAssets,
   isAssetPropKey,
-} from "./assets.js";
-import { collectImports } from "./collect-imports.js";
-import { serializeProp } from "./serialize-prop.js";
+} from "./assets/assets.js";
+import { collectImports } from "./imports/collect-imports.js";
+import { serializeProp } from "./props/serialize-prop.js";
 import type {
   EmitReactResult,
   ImportManifest,
   ImportRecord,
   ResolvedReactExportOptions,
-} from "./types.js";
+} from "./types/types.js";
 
 const ROOT_TYPE = "__root__";
 const SUPPORTED_IR_VERSION = "1";

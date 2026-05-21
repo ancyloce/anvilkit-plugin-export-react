@@ -5,7 +5,7 @@ import type {
   PageIRAsset,
   PageIRNode,
 } from "@anvilkit/core/types";
-import type { ImportRecord } from "./types.js";
+import type { ImportRecord } from "./types/types.js";
 
 /**
  * The set of prop keys the IR treats as asset references. Mirrors

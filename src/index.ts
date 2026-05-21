@@ -1,18 +1,18 @@
-export type { AssetPlan, AssetRewrite } from "./assets.js";
-export { collectReactAssets } from "./assets.js";
+export type { AssetPlan, AssetRewrite } from "./assets/assets.js";
+export { collectReactAssets } from "./assets/assets.js";
 export {
   collectImports,
   componentTypeToPackageSlug,
-} from "./collect-imports.js";
+} from "./imports/collect-imports.js";
 export { createReactExportPlugin } from "./plugin.js";
 export { emitReact } from "./emitter.js";
-export { reactFormat } from "./format-definition.js";
+export { reactFormat } from "./formats/format-definition.js";
 export {
   createExportReactHeaderAction,
   exportReactHeaderAction,
-} from "./header-action.js";
-export type { SerializedProp } from "./serialize-prop.js";
-export { serializeProp } from "./serialize-prop.js";
+} from "./actions/header-action.js";
+export type { SerializedProp } from "./props/serialize-prop.js";
+export { serializeProp } from "./props/serialize-prop.js";
 export type {
   EmitReactResult,
   ImportManifest,
@@ -20,5 +20,5 @@ export type {
   IRBuilder,
   ReactExportOptions,
   ResolvedReactExportOptions,
-} from "./types.js";
-export { REACT_EXPORT_DEFAULTS, resolveReactExportOptions } from "./types.js";
+} from "./types/types.js";
+export { REACT_EXPORT_DEFAULTS, resolveReactExportOptions } from "./types/types.js";

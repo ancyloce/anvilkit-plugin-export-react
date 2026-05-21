@@ -1,8 +1,8 @@
 import type { ExportFormatDefinition } from "@anvilkit/core/types";
 
 import { resolveReactAssetUrls } from "./assets.js";
-import { emitReact } from "./emitter.js";
-import { type ReactExportOptions, resolveReactExportOptions } from "./types.js";
+import { emitReact } from "../emitter.js";
+import { type ReactExportOptions, resolveReactExportOptions } from "../types/types.js";
 
 export const reactFormat: ExportFormatDefinition<ReactExportOptions> = {
   id: "react",
