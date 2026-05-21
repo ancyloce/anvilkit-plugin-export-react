@@ -6,10 +6,10 @@ import type {
 
 import config from "../meta/config.json";
 import packageJson from "../package.json";
+import { createExportReactHeaderAction } from "./actions/header-action.js";
 import { resolveReactAssetUrls } from "./assets/assets.js";
 import { emitReact } from "./emitter.js";
 import { reactFormat } from "./formats/format-definition.js";
-import { createExportReactHeaderAction } from "./actions/header-action.js";
 import {
 	type ReactExportOptions,
 	resolveReactExportOptions,

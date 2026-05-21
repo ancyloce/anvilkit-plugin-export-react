@@ -3,8 +3,8 @@ import type { StudioPluginContext } from "@anvilkit/core/types";
 import { describe, expect, it, vi } from "vitest";
 
 import packageJson from "../../package.json";
-import { heroFixture } from "./__fixtures__/hero.fixture.js";
 import { createReactExportPlugin } from "../index.js";
+import { heroFixture } from "./__fixtures__/hero.fixture.js";
 
 const studioConfig = StudioConfigSchema.parse({});
 
