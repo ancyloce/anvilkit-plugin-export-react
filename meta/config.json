@@ -1,0 +1,7 @@
+{
+	"id": "anvilkit-plugin-export-react",
+	"name": "React Export",
+	"coreVersion": "^0.1.0-alpha.0",
+	"description": "Export Puck pages as React (.tsx / .jsx) source files.",
+	"apabilities": { "sidebar": true }
+}

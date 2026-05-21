@@ -4,7 +4,7 @@ export {
   collectImports,
   componentTypeToPackageSlug,
 } from "./collect-imports.js";
-export { createReactExportPlugin } from "./create-react-export-plugin.js";
+export { createReactExportPlugin } from "./plugin.js";
 export { emitReact } from "./emitter.js";
 export { reactFormat } from "./format-definition.js";
 export {
