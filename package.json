@@ -1,6 +1,6 @@
 {
 	"name": "@anvilkit/plugin-export-react",
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"description": "React (.tsx/.jsx) export format for Anvilkit Studio — emits React source from PageIR.",
 	"type": "module",
 	"main": "./dist/index.cjs",
