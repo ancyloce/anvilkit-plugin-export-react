@@ -5,7 +5,6 @@ import type {
 } from "@anvilkit/core/types";
 
 import config from "../meta/config.json";
-import packageJson from "../package.json";
 import { createExportReactHeaderAction } from "./actions/header-action.js";
 import { resolveReactAssetUrls } from "./assets/assets.js";
 import { emitReact } from "./emitter.js";
@@ -14,12 +13,15 @@ import {
 	type ReactExportOptions,
 	resolveReactExportOptions,
 } from "./types/types.js";
+import { EXPORT_REACT_VERSION } from "./version.js";
 
-// `version` is derived from package.json so a Changesets bump can never drift
-// the runtime metadata; `plugin.metadata-drift.test.ts` guards regressions.
+// `version` comes from the hand-maintained `version.ts` constant rather than a
+// `package.json` import, which esbuild would inline whole and blow the gzip
+// budget. `plugin.metadata-drift.test.ts` asserts it matches package.json, so a
+// Changesets bump can never drift the runtime metadata.
 const reactExportPluginMeta: StudioPluginMeta = {
 	...config,
-	version: packageJson.version,
+	version: EXPORT_REACT_VERSION,
 };
 
 /**
