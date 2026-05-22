@@ -3,6 +3,8 @@ import type {
 	StudioPlugin,
 	StudioPluginMeta,
 } from "@anvilkit/core/types";
+import { FileCode2 } from "lucide-react";
+import { createElement } from "react";
 
 import config from "../meta/config.json";
 import { createExportReactHeaderAction } from "./actions/header-action.js";
@@ -22,6 +24,7 @@ import { EXPORT_REACT_VERSION } from "./version.js";
 const reactExportPluginMeta: StudioPluginMeta = {
 	...config,
 	version: EXPORT_REACT_VERSION,
+	icon: createElement(FileCode2),
 };
 
 /**

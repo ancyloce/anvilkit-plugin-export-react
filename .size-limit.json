@@ -2,7 +2,7 @@
 	{
 		"name": "@anvilkit/plugin-export-react",
 		"path": "dist/index.js",
-		"limit": "6 KB",
+		"limit": "8 KB",
 		"gzip": true,
 		"ignore": [
 			"react",
