@@ -1,6 +1,6 @@
 # @anvilkit/plugin-export-react
 
-> **Alpha (`0.1.3`).** The surface is implemented and tested; the emitted JSX contract may still evolve before `1.0.0`.
+> **Alpha (`0.1.4`).** The surface is implemented and tested; the emitted JSX contract may still evolve before `1.0.0`.
 
 React (`.tsx` / `.jsx`) export plugin for Anvilkit Studio. Turns a normalized `PageIR` into ready-to-drop React source: component imports from `@anvilkit/<slug>` packages, JSX with serialized props, and — optionally — `import` statements for any referenced local assets so Vite / Next can hash and fingerprint them. Pair with [`@anvilkit/plugin-export-html`](../plugin-export-html/README.md) when you also need standalone HTML output.
 
@@ -10,7 +10,7 @@ React (`.tsx` / `.jsx`) export plugin for Anvilkit Studio. Turns a normalized `P
 pnpm add @anvilkit/plugin-export-react @anvilkit/core react @puckeditor/core
 ```
 
-Non-optional peers: `react ^18.2.0`, `@puckeditor/core ^0.21.2`, `@anvilkit/core ^0.1.2`. `react-dom` is not required — the plugin emits source, not rendered DOM.
+Non-optional peers: `react ^18.2.0`, `@puckeditor/core ^0.21.2`, `@anvilkit/core ^0.1.4`. `react-dom` is not required — the plugin emits source, not rendered DOM.
 
 ## Quickstart
 
@@ -292,6 +292,10 @@ Review the snapshot diff in the PR — it should look JSX-like (`ImportDeclarati
 ### Alpha JSX contract
 
 The emitted JSX shape (attribute ordering, formatter quirks, comment placement) is not yet a stability contract. Consumers that diff exported source across releases should either re-format both sides or compare semantic shape via the AST.
+
+### Bundle budget and `version.ts`
+
+The main bundle is held to an **8 KB gzip** budget (`.size-limit.json`, enforced in CI). To stay under it, the plugin's version string lives in a hand-maintained `src/version.ts` constant rather than importing `package.json` (which would inline the whole JSON object). A `plugin.metadata-drift.test.ts` guard fails if `version.ts` falls out of sync with `package.json`, so bump both together when releasing.
 
 ### Why `text/plain` MIME type?
 
