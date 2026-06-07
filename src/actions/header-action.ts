@@ -10,6 +10,7 @@ import type { IRBuilder, ReactExportOptions } from "../types/types.js";
 // Bump the next export plugin to 120 to keep the toolbar ordering stable.
 const DEFAULT_HEADER_ACTION: Omit<StudioHeaderAction, "onClick"> = {
 	id: "export-react",
+	labelKey: "exportReact.action.export",
 	label: "Export React",
 	icon: "code",
 	group: "secondary",

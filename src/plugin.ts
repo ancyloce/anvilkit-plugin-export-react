@@ -11,6 +11,7 @@ import { createExportReactHeaderAction } from "./actions/header-action.js";
 import { resolveReactAssetUrls } from "./assets/assets.js";
 import { emitReact } from "./emitter.js";
 import { reactFormat } from "./formats/format-definition.js";
+import { EXPORT_REACT_ENTRY } from "./i18n/entry.js";
 import {
 	type ReactExportOptions,
 	resolveReactExportOptions,
@@ -73,7 +74,10 @@ export function createReactExportPlugin(
 
 	return {
 		meta: reactExportPluginMeta,
-		register(_ctx) {
+		register(ctx) {
+			// Contribute the `exportReact` catalog so the header action's and
+			// the export format's `labelKey` resolve in-chrome.
+			ctx.registerMessages(EXPORT_REACT_ENTRY);
 			return {
 				meta: reactExportPluginMeta,
 				exportFormats: [format],

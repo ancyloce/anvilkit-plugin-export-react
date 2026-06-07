@@ -9,6 +9,7 @@ import {
 
 export const reactFormat: ExportFormatDefinition<ReactExportOptions> = {
 	id: "react",
+	labelKey: "exportReact.format.react",
 	label: "React (.tsx)",
 	extension: "tsx",
 	mimeType: "text/plain",
