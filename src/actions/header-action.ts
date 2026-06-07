@@ -11,7 +11,6 @@ import type { IRBuilder, ReactExportOptions } from "../types/types.js";
 const DEFAULT_HEADER_ACTION: Omit<StudioHeaderAction, "onClick"> = {
 	id: "export-react",
 	labelKey: "exportReact.action.export",
-	label: "Export React",
 	icon: "code",
 	group: "secondary",
 	order: 110,
