@@ -9,8 +9,13 @@ import type { ImportRecord } from "../types/types.js";
 
 /**
  * The set of prop keys the IR treats as asset references. Mirrors
- * `@anvilkit/ir`'s `ASSET_KEY_PATTERN` regex; kept as a local copy so
- * the React plugin has no runtime dependency on `@anvilkit/ir`.
+ * `@anvilkit/ir`'s `ASSET_KEY_PATTERN` regex, plus `previewUrl`: a
+ * DesignBlock stores a tiny `design://<designId>` reference there (the heavy
+ * preview bytes live in the canvas plugin's object-URL store, off Puck's undo
+ * history), so the export must run it through the resolver chain — the
+ * `design://` resolver rewrites it to the self-contained preview data URL.
+ * Kept as a local copy so the React plugin has no runtime dependency on
+ * `@anvilkit/ir`.
  */
 const ASSET_PROP_KEYS = new Set([
 	"src",
@@ -26,9 +31,16 @@ const ASSET_PROP_KEYS = new Set([
 	"backgroundImage",
 	"poster",
 	"thumbnailSrc",
+	"previewUrl",
 ]);
 
 const ASSET_REFERENCE_PREFIX = "asset://";
+const DESIGN_REFERENCE_PREFIX = "design://";
+/** Reference schemes the export resolves through the resolver chain. */
+const REFERENCE_PREFIXES = [
+	ASSET_REFERENCE_PREFIX,
+	DESIGN_REFERENCE_PREFIX,
+] as const;
 
 /**
  * A rewrite entry: for an asset URL, which binding identifier the
@@ -74,6 +86,10 @@ interface AssetReferenceInfo {
 	readonly allowSafeDataImage?: boolean;
 }
 
+// Prop keys whose value may inline a `data:image/...` URL in the export. A
+// DesignBlock's `previewUrl` resolves (via the `design://` resolver) to the
+// self-contained preview data URL, so it joins the image-bearing keys; the
+// `isSafeDataImageUrl` regex still restricts it to real image mime types.
 const SAFE_DATA_IMAGE_KEYS = new Set([
 	"src",
 	"imageUrl",
@@ -82,6 +98,7 @@ const SAFE_DATA_IMAGE_KEYS = new Set([
 	"backgroundImage",
 	"poster",
 	"thumbnailSrc",
+	"previewUrl",
 ]);
 
 /** Non-cryptographic 32-bit FNV-1a hash. Matches `@anvilkit/ir`. */
@@ -624,11 +641,16 @@ function stripUnsafeAscii(input: string): string {
 }
 
 function parseAssetId(url: string): string | null {
-	if (!url.startsWith(ASSET_REFERENCE_PREFIX)) {
+	// `asset://<id>` (asset-manager) and `design://<designId>[/<artboardId>]`
+	// (canvas DesignBlock preview) are both resolvable references — a resolver
+	// in the chain rewrites them and the resolved URL runs through the same
+	// `normalizeResolvedAssetUrl` validation either way.
+	const prefix = REFERENCE_PREFIXES.find((p) => url.startsWith(p));
+	if (prefix === undefined) {
 		return null;
 	}
 
-	const assetId = url.slice(ASSET_REFERENCE_PREFIX.length).trim();
+	const assetId = url.slice(prefix.length).trim();
 	return assetId === "" ? null : assetId;
 }
 

@@ -305,6 +305,45 @@ describe("React export asset resolvers", () => {
 		expect(result.content).not.toContain("asset://");
 	});
 
+	it("resolves a DesignBlock design:// previewUrl to the inlined preview data URL", async () => {
+		// DesignBlock stores a tiny `design://` reference in `previewUrl` (the
+		// preview bytes live in the canvas plugin's object-URL store, off Puck's
+		// undo history). React export must resolve it through the resolver chain
+		// so the emitted component is self-contained — the `design://` resolver
+		// hands back the preview data URL, which is allowed to inline because
+		// `previewUrl` is an image-bearing key.
+		const previewDataUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
+		const ir: PageIR = {
+			version: "1",
+			root: {
+				id: "root",
+				type: "__root__",
+				props: {},
+				children: [
+					{
+						id: "db-1",
+						type: "DesignBlock",
+						props: { designId: "abc", previewUrl: "design://abc/p1" },
+					},
+				],
+			},
+			assets: [],
+			metadata: {},
+		};
+		const result = await reactFormat.run(
+			ir,
+			{ assetStrategy: "url-prop" },
+			{
+				assetResolvers: [
+					(url) => (url === "design://abc/p1" ? { url: previewDataUrl } : null),
+				],
+			},
+		);
+
+		expect(result.content).toContain(previewDataUrl);
+		expect(result.content).not.toContain("design://");
+	});
+
 	it("drops hostile resolved URLs and emits ASSET_UNRESOLVED", async () => {
 		const result = await reactFormat.run(
 			irWithHeroSrc("asset://asset-1"),
