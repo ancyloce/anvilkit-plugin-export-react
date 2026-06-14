@@ -16,4 +16,4 @@
  * A bare string constant ships only the version. Mirrors
  * `@anvilkit/core`'s `runtime/version.ts`, which makes the same call.
  */
-export const EXPORT_REACT_VERSION = "0.1.5";
+export const EXPORT_REACT_VERSION = "0.1.6";
