@@ -34,13 +34,13 @@ const ASSET_PROP_KEYS = new Set([
 	"previewUrl",
 ]);
 
-const ASSET_REFERENCE_PREFIX = "asset://";
-const DESIGN_REFERENCE_PREFIX = "design://";
-/** Reference schemes the export resolves through the resolver chain. */
-const REFERENCE_PREFIXES = [
-	ASSET_REFERENCE_PREFIX,
-	DESIGN_REFERENCE_PREFIX,
-] as const;
+/**
+ * Reference schemes the export resolves through the resolver chain:
+ * `asset://<id>` (asset-manager) and `design://<designId>[/<artboardId>]`
+ * (canvas DesignBlock preview). The capture group is everything after the
+ * prefix — `parseAssetId` trims it and treats an empty remainder as no match.
+ */
+const REFERENCE_PATTERN = /^(?:asset|design):\/\/([\s\S]+)/;
 
 /**
  * A rewrite entry: for an asset URL, which binding identifier the
@@ -641,17 +641,12 @@ function stripUnsafeAscii(input: string): string {
 }
 
 function parseAssetId(url: string): string | null {
-	// `asset://<id>` (asset-manager) and `design://<designId>[/<artboardId>]`
-	// (canvas DesignBlock preview) are both resolvable references — a resolver
-	// in the chain rewrites them and the resolved URL runs through the same
-	// `normalizeResolvedAssetUrl` validation either way.
-	const prefix = REFERENCE_PREFIXES.find((p) => url.startsWith(p));
-	if (prefix === undefined) {
-		return null;
-	}
-
-	const assetId = url.slice(prefix.length).trim();
-	return assetId === "" ? null : assetId;
+	// Both `asset://` and `design://` references run through the same resolver
+	// chain, and the resolved URL hits the same `normalizeResolvedAssetUrl`
+	// validation either way. An empty id (`asset://` with nothing after) is
+	// treated as no reference.
+	const assetId = REFERENCE_PATTERN.exec(url)?.[1]?.trim();
+	return assetId || null;
 }
 
 function makeUnresolvedWarning(
