@@ -1,6 +1,6 @@
 # @anvilkit/plugin-export-react
 
-> **Alpha (`0.1.4`).** The surface is implemented and tested; the emitted JSX contract may still evolve before `1.0.0`.
+> **Alpha (`0.1.6`).** The surface is implemented and tested; the emitted JSX contract may still evolve before `1.0.0`.
 
 React (`.tsx` / `.jsx`) export plugin for Anvilkit Studio. Turns a normalized `PageIR` into ready-to-drop React source: component imports from `@anvilkit/<slug>` packages, JSX with serialized props, and — optionally — `import` statements for any referenced local assets so Vite / Next can hash and fingerprint them. Pair with [`@anvilkit/plugin-export-html`](../plugin-export-html/README.md) when you also need standalone HTML output.
 
@@ -41,7 +41,7 @@ When `buildIR` is supplied, clicking "Export React" runs end-to-end and broadcas
 - **Deterministic imports** — `collectImports` walks the IR, maps `PascalCase` component types to `@anvilkit/<slug>` packages, and sorts the manifest for byte-stable output.
 - **AST snapshot testing** — output is parsed through `@typescript-eslint/typescript-estree` so the test suite catches shape changes while ignoring whitespace churn.
 - **Strict prop serialization** — only JSON-serializable values pass through; functions, `Date`, `Map`, `Set`, `RegExp`, `Promise`, `symbol`, `bigint`, and `undefined` are rejected with `NON_SERIALIZABLE_PROP` warnings.
-- **8-code warning channel** — typed, host-fatal-able warnings for the seven things that can go wrong at emit time.
+- **8-code warning channel** — typed, host-fatal-able warnings for the eight things that can go wrong at emit time.
 
 ## API reference
 
@@ -57,7 +57,7 @@ Returns a `StudioPlugin` that registers one export format (`id: "react"`) and on
 | ------------- | ------------------------------ |
 | `id`          | `anvilkit-plugin-export-react` |
 | `name`        | `React Export`                 |
-| `coreVersion` | `^0.1.0-alpha.0`               |
+| `coreVersion` | `^0.1.3`                       |
 
 ### `ReactExportOptions`
 
