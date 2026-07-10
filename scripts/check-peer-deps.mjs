@@ -10,7 +10,7 @@ const PACKAGE_ROOT = resolve(__dirname, "..");
 const PACKAGE_JSON = resolve(PACKAGE_ROOT, "package.json");
 const CORE_PACKAGE_JSON = resolve(
 	PACKAGE_ROOT,
-	"../../core/package.json",
+	"../../../runtime/core/package.json",
 );
 const REQUIRED_PEERS = ["react", "@puckeditor/core", "@anvilkit/core"];
 
