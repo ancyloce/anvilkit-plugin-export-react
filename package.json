@@ -41,7 +41,7 @@
 	},
 	"peerDependencies": {
 		"@anvilkit/core": "^0.1.4",
-		"@puckeditor/core": "^0.22.1",
+		"@puckeditor/core": "^0.22.2",
 		"react": ">=19.0.0"
 	},
 	"peerDependenciesMeta": {
@@ -76,7 +76,7 @@
 		"@anvilkit/core": "workspace:*",
 		"@anvilkit/typescript-config": "workspace:*",
 		"@anvilkit/vitest-config": "workspace:*",
-		"@puckeditor/core": "^0.22.1",
+		"@puckeditor/core": "^0.22.2",
 		"@rslib/core": "^0.23.2",
 		"@types/node": "^26.1.1",
 		"@typescript-eslint/typescript-estree": "^8.0.0",
