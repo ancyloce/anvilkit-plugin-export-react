@@ -82,8 +82,8 @@
 		"@typescript-eslint/typescript-estree": "^8.0.0",
 		"esbuild": "^0.28.1",
 		"madge": "^8.0.0",
-		"publint": "^0.3.21",
-		"react": "^19.2.7",
+		"publint": "^0.3.22",
+		"react": "^19.2.8",
 		"typescript": "7.0.2",
 		"vitest": "^4.1.10"
 	},
