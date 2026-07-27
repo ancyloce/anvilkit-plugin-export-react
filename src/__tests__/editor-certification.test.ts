@@ -3,31 +3,45 @@
  * exporter(s): `plugin-export-html`, then `plugin-export-react`";
  * DD-0019 §23.2, §32.3; DD-DEC-018).
  *
- * REVIEW-0019 §2 recorded this package as the one `MISSING` capability:
- * no `editorCapabilities` declaration, no fixtures, no preflight
- * coverage. It blocked the same way the HTML format does, but with
- * nothing on record saying so — so a consumer hitting the block could
- * not tell a deliberate assessment from an exporter nobody had audited.
+ * REVIEW-0019 §2 recorded this package as the review's one `MISSING`
+ * item: no `editorCapabilities` declaration, no certification fixtures,
+ * no preflight coverage. It blocked production export exactly as the
+ * HTML format does, but with **nothing on record** saying so — so a
+ * consumer hitting the block could not tell a deliberate assessment
+ * from an exporter nobody had audited. This suite is that record.
  *
- * This mirrors `plugin-export-html`'s wave-1 suite and certifies four
- * things about the declaration:
+ * ### Why the format still declares nothing
  *
- * 1. it exists, is assessed-empty, and reaches the format object;
- * 2. it survives plugin binding into the registry — a format that
- *    loses it on the way is indistinguishable from one that never
- *    declared it;
- * 3. every editor feature a document might use **blocks** production
- *    export and only *warns* in development preview, because this
- *    emitter supports none of them yet;
- * 4. documents using no editor features still export byte-identically
- *    — the DD-0019 §3.2 guarantee that adding the editor changes
- *    nothing for existing documents.
+ * The audited assessment is "supports no editor features", identical to
+ * `plugin-export-html`'s: `emitter.ts` turns PageIR nodes into JSX
+ * element calls and prop literals, emitting no `style` prop, no
+ * `className`, no stylesheet and no `@media` rule, and importing
+ * neither `@anvilkit/core/editor` nor `@anvilkit/ir/editor` — so it
+ * never sees a resolved or materialized authoring model.
+ *
+ * HTML records that assessment as an explicit
+ * `supportedFeatures: []`. This package **cannot**: its entry chunk
+ * sits 11 gzipped bytes under a 6,144 B hard budget, and the field
+ * costs ~54 raw / ~22 gzipped bytes (measured: 6,133 → 6,155 B with the
+ * literal inlined, 6,160 B via a named const). Under DD-DEC-018 an
+ * absent declaration and an assessed-empty one gate **identically**, so
+ * the field would buy documentation value only — and raising a size
+ * budget to buy documentation is precisely the gate-weakening the plan
+ * forbids (§13: pre-existing/blocking numbers are "reported, never
+ * masked or 'fixed' by weakening gates").
+ *
+ * So the assessment is recorded here, in tests that cost zero shipped
+ * bytes, and the declaration itself is an owner decision (raise the
+ * budget, find offsetting savings in this package, or accept the
+ * absence). **`editorCapabilities` staying `undefined` is deliberate
+ * and asserted** — do not "fix" it without re-running
+ * `pnpm --filter @anvilkit/plugin-export-react check:bundle-budget`.
  *
  * Assertions run through `runExportPreflight`, the same entry point
- * `runExport` enforces in production, rather than re-deriving the
- * verdict from `validateExportCapabilities` — certifying the path
- * consumers actually take. Everything is imported from `@anvilkit/core`
- * so this package gains no new dependency.
+ * `runExport` enforces in production, rather than re-deriving verdicts
+ * from `validateExportCapabilities` — certifying the path consumers
+ * actually take. Everything is imported from `@anvilkit/core`, so this
+ * package gains no new dependency.
  */
 
 import { compilePlugins, StudioConfigSchema } from "@anvilkit/core";
@@ -38,10 +52,8 @@ import {
 } from "@anvilkit/core/editor";
 import type { StudioPluginContext } from "@anvilkit/core/types";
 import { describe, expect, it, vi } from "vitest";
-import {
-	REACT_EDITOR_CAPABILITIES,
-	reactFormat,
-} from "../formats/format-definition.js";
+
+import { reactFormat } from "../formats/format-definition.js";
 import { createReactExportPlugin } from "../index.js";
 import { heroFixture } from "./__fixtures__/hero.fixture.js";
 
@@ -60,46 +72,12 @@ function makeCtx(): StudioPluginContext {
 	};
 }
 
-describe("editor capability declaration", () => {
-	it("declares an assessed-empty capability set", () => {
-		// Empty is the audited result, not an oversight — see the
-		// rationale on REACT_EDITOR_CAPABILITIES.
-		expect(REACT_EDITOR_CAPABILITIES.version).toBe("1");
-		expect(REACT_EDITOR_CAPABILITIES.supportedFeatures).toEqual([]);
-		expect(reactFormat.editorCapabilities).toBe(REACT_EDITOR_CAPABILITIES);
-	});
-
-	it("survives plugin binding into the registry", async () => {
-		const runtime = await compilePlugins(
-			[createReactExportPlugin()],
-			makeCtx(),
-		);
-		const registered = runtime.exportFormats.get("react");
-		expect(registered).toBeDefined();
-		expect(registered?.editorCapabilities).toEqual(REACT_EDITOR_CAPABILITIES);
-		expect(registered?.labelKey).toBe("exportReact.format.react");
-	});
-
-	it("survives binding when options rebuild the format object", async () => {
-		// The options path spreads `reactFormat` and replaces `run`; a
-		// hand-picked field list there would silently drop the
-		// declaration (the exact defect wave 1 had to fix).
-		const runtime = await compilePlugins(
-			[createReactExportPlugin({ syntax: "jsx" })],
-			makeCtx(),
-		);
-		expect(runtime.exportFormats.get("react")?.editorCapabilities).toEqual(
-			REACT_EDITOR_CAPABILITIES,
-		);
-	});
-});
-
-describe("used-feature preflight (§23.2)", () => {
-	const featureDocuments: readonly [string, Authoring][] = [
-		[
-			"responsive",
-			{
-				...createEmptyAuthoringState(),
+function authoringUsing(feature: string): Authoring {
+	const empty = createEmptyAuthoringState();
+	switch (feature) {
+		case "responsive":
+			return {
+				...empty,
 				breakpoints: [
 					{
 						id: "tablet",
@@ -109,12 +87,10 @@ describe("used-feature preflight (§23.2)", () => {
 						enabled: true,
 					},
 				],
-			},
-		],
-		[
-			"tokens",
-			{
-				...createEmptyAuthoringState(),
+			};
+		case "tokens":
+			return {
+				...empty,
 				tokens: {
 					brand: {
 						id: "brand",
@@ -124,12 +100,10 @@ describe("used-feature preflight (§23.2)", () => {
 						values: {},
 					},
 				},
-			},
-		],
-		[
-			"styleDefinitions",
-			{
-				...createEmptyAuthoringState(),
+			};
+		case "styleDefinitions":
+			return {
+				...empty,
 				styleDefinitions: {
 					card: {
 						version: "1",
@@ -140,12 +114,10 @@ describe("used-feature preflight (§23.2)", () => {
 						updatedAt: "2026-01-01T00:00:00.000Z",
 					},
 				},
-			},
-		],
-		[
-			"localComponents",
-			{
-				...createEmptyAuthoringState(),
+			};
+		case "localComponents":
+			return {
+				...empty,
 				componentDefinitions: {
 					def: {
 						version: "1",
@@ -160,18 +132,64 @@ describe("used-feature preflight (§23.2)", () => {
 						updatedAt: "2026-01-01T00:00:00.000Z",
 					},
 				},
-			},
-		],
-	] as readonly [string, Authoring][];
+			};
+		default:
+			throw new Error(`unhandled feature ${feature}`);
+	}
+}
 
-	for (const [feature, authoring] of featureDocuments) {
+const FEATURES = [
+	"responsive",
+	"tokens",
+	"styleDefinitions",
+	"localComponents",
+] as const;
+
+describe("editor capability declaration (assessed: supports nothing)", () => {
+	it("declares nothing, deliberately — see the file header", () => {
+		// Pinning `undefined` is the point: it makes the absence an
+		// audited decision with a byte budget behind it, not an oversight
+		// a future reader has to re-litigate.
+		expect(reactFormat.editorCapabilities).toBeUndefined();
+	});
+
+	it("still declares nothing after plugin binding", async () => {
+		const runtime = await compilePlugins(
+			[createReactExportPlugin()],
+			makeCtx(),
+		);
+		const registered = runtime.exportFormats.get("react");
+		expect(registered).toBeDefined();
+		expect(registered?.editorCapabilities).toBeUndefined();
+		expect(registered?.labelKey).toBe("exportReact.format.react");
+	});
+
+	it("still declares nothing when options rebuild the format object", async () => {
+		// The options path spreads `reactFormat` and replaces `run`. This
+		// guards the shape of that spread: if a declaration is ever added,
+		// a hand-picked field list here would silently drop it — the exact
+		// defect wave 1 had to fix in `plugin-export-html`.
+		const runtime = await compilePlugins(
+			[createReactExportPlugin({ syntax: "jsx" })],
+			makeCtx(),
+		);
+		const registered = runtime.exportFormats.get("react");
+		expect(registered?.id).toBe("react");
+		expect(registered?.editorCapabilities).toBe(reactFormat.editorCapabilities);
+	});
+});
+
+describe("used-feature preflight (§23.2)", () => {
+	for (const feature of FEATURES) {
 		it(`blocks production export for a document using "${feature}"`, () => {
-			const usedFeatures = listUsedAuthoringFeatures(authoring);
+			const usedFeatures = listUsedAuthoringFeatures(authoringUsing(feature));
 			expect(usedFeatures).toContain(feature);
 			const result = runExportPreflight({
 				usedFeatures,
 				capabilities: reactFormat.editorCapabilities,
 			});
+			// Fail-closed: an undeclared format blocks every editor feature
+			// rather than emitting output that silently dropped it.
 			expect(result.status).toBe("blocked");
 			expect(result.errors.map((error) => error.code)).toContain(
 				"EDITOR_EXPORTER_UNSUPPORTED",
@@ -185,9 +203,7 @@ describe("used-feature preflight (§23.2)", () => {
 
 	it("degrades to a warning in development preview rather than blocking", () => {
 		const result = runExportPreflight({
-			usedFeatures: listUsedAuthoringFeatures(
-				featureDocuments[1]?.[1] as Authoring,
-			),
+			usedFeatures: listUsedAuthoringFeatures(authoringUsing("tokens")),
 			capabilities: reactFormat.editorCapabilities,
 			mode: "development",
 		});
@@ -204,24 +220,26 @@ describe("used-feature preflight (§23.2)", () => {
 		});
 		expect(result.status).toBe("passed");
 		expect(result.errors).toEqual([]);
+		expect(result.event.status).toBe("passed");
 	});
 
-	it("blocks identically for a format that declares nothing at all", () => {
-		// An absent declaration and an assessed-empty one must gate the
-		// same way (DD-DEC-018) — so declaring empty costs no behaviour
-		// change, which is why it was safe to add.
-		const usedFeatures = listUsedAuthoringFeatures(
-			featureDocuments[1]?.[1] as Authoring,
+	it("gates identically to an explicitly assessed-empty declaration", () => {
+		// DD-DEC-018's equivalence, asserted — this is the property that
+		// makes shipping the field optional rather than behavioural, and
+		// therefore the property the budget decision rests on.
+		const usedFeatures = listUsedAuthoringFeatures(authoringUsing("tokens"));
+		const absent = runExportPreflight({
+			usedFeatures,
+			capabilities: reactFormat.editorCapabilities,
+		});
+		const assessedEmpty = runExportPreflight({
+			usedFeatures,
+			capabilities: { version: "1", supportedFeatures: [] },
+		});
+		expect(absent.status).toBe(assessedEmpty.status);
+		expect(absent.errors.map((error) => error.code)).toEqual(
+			assessedEmpty.errors.map((error) => error.code),
 		);
-		expect(
-			runExportPreflight({ usedFeatures, capabilities: undefined }).status,
-		).toBe("blocked");
-		expect(
-			runExportPreflight({
-				usedFeatures,
-				capabilities: reactFormat.editorCapabilities,
-			}).status,
-		).toBe("blocked");
 	});
 });
 
@@ -229,8 +247,9 @@ describe("byte-stability for non-editor documents (§3.2)", () => {
 	it("produces identical output across runs", async () => {
 		const first = await reactFormat.run(heroFixture, {}, undefined);
 		const second = await reactFormat.run(heroFixture, {}, undefined);
-		// Identical input → identical output; adding the capability
-		// declaration changed no emitted byte.
+		// Identical input → identical output: the certification pass
+		// changed no emitted byte, which is the §3.2 guarantee for
+		// documents that use no editor features.
 		expect(first.content).toBe(second.content);
 		expect(first.filename).toBe(second.filename);
 	});
