@@ -18,7 +18,16 @@ const ROOT_TYPE = "__root__";
 const SUPPORTED_IR_VERSION = "1";
 const INDENT = "  ";
 
-const VALID_JSX_TAG = /^[A-Z][A-Za-z0-9]*$/;
+/**
+ * PascalCase component names, plus the two lowercase intrinsic tags
+ * the editor-authoring transform injects (PLAN-0020 CORE-P2-012 wave
+ * 2): `div` carries `data-ak-node` style wrappers, `style` carries
+ * the authored stylesheet. Deliberately an allowlist, not a general
+ * lowercase rule — arbitrary lowercase IR types keep warning as
+ * invalid component names, and neither tag produces an import
+ * (`collectImports` only maps PascalCase types).
+ */
+const VALID_JSX_TAG = /^(?:[A-Z][A-Za-z0-9]*|div|style)$/;
 const VALID_JSX_ATTR = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 
 // Threshold (in characters of the inline prop segment) above which props

@@ -8,14 +8,9 @@ import { createElement } from "react";
 
 import config from "../meta/config.json";
 import { createExportReactHeaderAction } from "./actions/header-action.js";
-import { resolveReactAssetUrls } from "./assets/assets.js";
-import { emitReact } from "./emitter.js";
 import { reactFormat } from "./formats/format-definition.js";
 import { EXPORT_REACT_ENTRY } from "./i18n/entry.js";
-import {
-	type ReactExportOptions,
-	resolveReactExportOptions,
-} from "./types/types.js";
+import type { ReactExportOptions } from "./types/types.js";
 import { EXPORT_REACT_VERSION } from "./version.js";
 
 // `version` comes from the hand-maintained `version.ts` constant rather than a
@@ -53,21 +48,10 @@ export function createReactExportPlugin(
 			? reactFormat
 			: {
 					...reactFormat,
-					run: async (ir, callOptions, runCtx) => {
-						const resolved = resolveReactExportOptions({
-							...opts,
-							...callOptions,
-						});
-						const { ir: resolvedIr, warnings: resolutionWarnings } =
-							await resolveReactAssetUrls(ir, runCtx?.assetResolvers ?? []);
-						const { code, warnings } = emitReact(resolvedIr, resolved);
-						const extension = resolved.syntax === "jsx" ? "jsx" : "tsx";
-						return {
-							content: code,
-							filename: `page.${extension}`,
-							warnings: [...resolutionWarnings, ...warnings],
-						};
-					},
+					// One pipeline: delegate to `reactFormat.run` with the
+					// plugin-level defaults merged under call-site options.
+					run: (ir, callOptions, runCtx) =>
+						reactFormat.run(ir, { ...opts, ...callOptions }, runCtx),
 				};
 
 	const headerAction = createExportReactHeaderAction(format, opts);
