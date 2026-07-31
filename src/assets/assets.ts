@@ -126,15 +126,13 @@ function hasTraversalSegment(url: string): boolean {
 	return pathPart.split(/[\\/]/).some((segment) => segment === "..");
 }
 
-function hasUnsafeScheme(url: string): boolean {
-	// Any `scheme:` prefix that isn't one of the known local-asset cases
-	// (`./`, `../`, `/`, bare relative) is considered unsafe for static
-	// import — defense in depth beyond the isExternalUrl heuristic.
-	const schemeMatch = url.match(/^([A-Za-z][A-Za-z0-9+.-]*):/);
-	if (!schemeMatch) return false;
-	const scheme = schemeMatch[1]?.toLowerCase();
-	return scheme !== undefined;
-}
+/**
+ * Any `scheme:` prefix that isn't one of the known local-asset cases
+ * (`./`, `../`, `/`, bare relative) is considered unsafe for static
+ * import — defense in depth beyond the isExternalUrl heuristic. The
+ * scheme itself is never inspected, only its presence.
+ */
+const UNSAFE_SCHEME_PATTERN = /^[A-Za-z][A-Za-z0-9+.-]*:/;
 
 function isAssetProp(key: string): boolean {
 	return ASSET_PROP_KEYS.has(key);
@@ -382,7 +380,7 @@ export function collectReactAssets(
 			continue;
 		}
 
-		if (hasTraversalSegment(url) || hasUnsafeScheme(url)) {
+		if (hasTraversalSegment(url) || UNSAFE_SCHEME_PATTERN.test(url)) {
 			warnings.push({
 				level: "warn",
 				code: "UNSAFE_ASSET_PATH",
@@ -451,7 +449,19 @@ function walkNodeForAssetReferences(
 	node: PageIRNode,
 	references: Map<string, AssetReferenceInfo>,
 ): void {
-	collectPropReferences(node.props, references, node.id);
+	// Shares the one prop walker with `collectReactAssets`. It skips
+	// empty-string values, which `parseAssetId` would reject anyway, so the
+	// reference set is unchanged — and its cycle guard makes a
+	// self-referential prop object terminate instead of overflowing.
+	for (const { propName, url } of walkAssetValue(node.props, node.id)) {
+		const current = references.get(url);
+		references.set(url, {
+			kind: current?.kind,
+			nodeId: current?.nodeId ?? node.id,
+			allowSafeDataImage:
+				current?.allowSafeDataImage ?? SAFE_DATA_IMAGE_KEYS.has(propName),
+		});
+	}
 
 	if (node.assets) {
 		for (const asset of node.assets) {
@@ -469,43 +479,6 @@ function walkNodeForAssetReferences(
 		for (const child of node.children) {
 			walkNodeForAssetReferences(child, references);
 		}
-	}
-}
-
-function collectPropReferences(
-	value: unknown,
-	references: Map<string, AssetReferenceInfo>,
-	nodeId: string,
-	key?: string,
-): void {
-	if (Array.isArray(value)) {
-		for (const entry of value) {
-			collectPropReferences(entry, references, nodeId);
-		}
-		return;
-	}
-
-	if (typeof value === "string") {
-		if (key !== undefined && isAssetProp(key)) {
-			const current = references.get(value);
-			references.set(value, {
-				kind: current?.kind,
-				nodeId: current?.nodeId ?? nodeId,
-				allowSafeDataImage:
-					current?.allowSafeDataImage ?? SAFE_DATA_IMAGE_KEYS.has(key),
-			});
-		}
-		return;
-	}
-
-	if (value === null || typeof value !== "object") {
-		return;
-	}
-
-	for (const [entryKey, entryValue] of Object.entries(
-		value as Record<string, unknown>,
-	)) {
-		collectPropReferences(entryValue, references, nodeId, entryKey);
 	}
 }
 
