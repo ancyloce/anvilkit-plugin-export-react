@@ -21,6 +21,24 @@ export interface SerializedProp {
 
 const NON_SERIALIZABLE_PLACEHOLDER = "{/* omitted: non-serializable */}";
 
+/**
+ * Build the shared `NON_SERIALIZABLE_PROP` warning shape. Every route
+ * that degrades a prop — non-finite number, detected non-serializable
+ * value, `JSON.stringify` throw, or placeholder fallback — reports
+ * through here, so the level/code pair is stated once.
+ */
+function nonSerializableWarning(
+	message: string,
+	opts?: { readonly nodeId?: string },
+): ExportWarning {
+	return {
+		level: "warn",
+		code: "NON_SERIALIZABLE_PROP",
+		message,
+		...(opts?.nodeId ? { nodeId: opts.nodeId } : {}),
+	};
+}
+
 function isPlainObject(value: unknown): value is Record<string, unknown> {
 	if (value === null || typeof value !== "object") return false;
 	const proto = Object.getPrototypeOf(value);
@@ -115,22 +133,20 @@ export function serializeProp(
 				return { value: `{${JSON.stringify(value)}}`, warnings: [] };
 			}
 			return { value: `"${escapeStringForAttribute(value)}"`, warnings: [] };
-		case "number":
+		case "number": {
+			if (Number.isFinite(value)) {
+				return { value: `{${String(value)}}`, warnings: [] };
+			}
 			return {
-				value: Number.isFinite(value) ? `{${String(value)}}` : "{null}",
-				warnings: Number.isFinite(value)
-					? []
-					: [
-							{
-								level: "warn",
-								code: "NON_SERIALIZABLE_PROP",
-								message: `Non-finite number on prop \`${
-									opts?.propName ?? "?"
-								}\`; emitted \`{null}\`.`,
-								...(opts?.nodeId ? { nodeId: opts.nodeId } : {}),
-							},
-						],
+				value: "{null}",
+				warnings: [
+					nonSerializableWarning(
+						`Non-finite number on prop \`${opts?.propName ?? "?"}\`; emitted \`{null}\`.`,
+						opts,
+					),
+				],
 			};
+		}
 		case "boolean":
 			return { value: `{${value ? "true" : "false"}}`, warnings: [] };
 		case "object": {
@@ -172,14 +188,12 @@ function detectUnserializable(
 	if (value === null) return;
 	const unserializableKind = describeUnserializable(value);
 	if (unserializableKind !== null) {
-		warnings.push({
-			level: "warn",
-			code: "NON_SERIALIZABLE_PROP",
-			message: `Prop \`${
-				opts?.propName ?? "?"
-			}\` contains a non-serializable ${unserializableKind}.`,
-			...(opts?.nodeId ? { nodeId: opts.nodeId } : {}),
-		});
+		warnings.push(
+			nonSerializableWarning(
+				`Prop \`${opts?.propName ?? "?"}\` contains a non-serializable ${unserializableKind}.`,
+				opts,
+			),
+		);
 		return;
 	}
 	if (typeof value !== "object") return;
@@ -208,12 +222,12 @@ function safeJsonStringify(
 	try {
 		return JSON.stringify(value);
 	} catch {
-		warnings.push({
-			level: "warn",
-			code: "NON_SERIALIZABLE_PROP",
-			message: `Prop \`${opts?.propName ?? "?"}\` could not be JSON-serialized.`,
-			...(opts?.nodeId ? { nodeId: opts.nodeId } : {}),
-		});
+		warnings.push(
+			nonSerializableWarning(
+				`Prop \`${opts?.propName ?? "?"}\` could not be JSON-serialized.`,
+				opts,
+			),
+		);
 		return "null";
 	}
 }
@@ -225,14 +239,12 @@ function nonSerializablePlaceholder(
 	return {
 		value: NON_SERIALIZABLE_PLACEHOLDER,
 		warnings: [
-			{
-				level: "warn",
-				code: "NON_SERIALIZABLE_PROP",
-				message: `Prop \`${opts?.propName ?? "?"}\` is a ${
+			nonSerializableWarning(
+				`Prop \`${opts?.propName ?? "?"}\` is a ${
 					describeUnserializable(value) ?? "unknown"
 				} and cannot be emitted as JSX.`,
-				...(opts?.nodeId ? { nodeId: opts.nodeId } : {}),
-			},
+				opts,
+			),
 		],
 	};
 }
