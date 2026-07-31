@@ -171,7 +171,10 @@ export async function resolveReactAssetUrls(
 					return {
 						url,
 						blocked: true,
-						warning: makeUnresolvedWarning(assetId, info.nodeId),
+						warning: makeUnresolvedWarning(
+							`Asset "${assetId}" could not be resolved during React export and was omitted.`,
+							info.nodeId,
+						),
 					};
 				}
 
@@ -183,12 +186,10 @@ export async function resolveReactAssetUrls(
 					return {
 						url,
 						blocked: true,
-						warning: {
-							level: "warn",
-							code: "ASSET_UNRESOLVED",
-							message: `Asset "${assetId}" resolved to a disallowed URL during React export and was omitted.`,
-							...(info.nodeId ? { nodeId: info.nodeId } : {}),
-						},
+						warning: makeUnresolvedWarning(
+							`Asset "${assetId}" resolved to a disallowed URL during React export and was omitted.`,
+							info.nodeId,
+						),
 					};
 				}
 
@@ -201,12 +202,7 @@ export async function resolveReactAssetUrls(
 				return {
 					url,
 					blocked: true,
-					warning: {
-						level: "warn",
-						code: "ASSET_UNRESOLVED",
-						message: error.message,
-						...(info.nodeId ? { nodeId: info.nodeId } : {}),
-					},
+					warning: makeUnresolvedWarning(error.message, info.nodeId),
 				};
 			}
 		}),
@@ -622,14 +618,20 @@ function parseAssetId(url: string): string | null {
 	return assetId || null;
 }
 
+/**
+ * Build the shared `ASSET_UNRESOLVED` warning shape. Every asset that
+ * drops out of the export — unresolved, resolved to a disallowed URL,
+ * or rejected by a resolver — reports through here, so the level/code
+ * pair is stated once.
+ */
 function makeUnresolvedWarning(
-	assetId: string,
+	message: string,
 	nodeId?: string,
 ): ExportWarning {
 	return {
 		level: "warn",
 		code: "ASSET_UNRESOLVED",
-		message: `Asset "${assetId}" could not be resolved during React export and was omitted.`,
+		message,
 		...(nodeId ? { nodeId } : {}),
 	};
 }

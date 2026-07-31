@@ -236,6 +236,24 @@ describe("emitReact — asset strategy integration", () => {
 		expect(result.code).toMatch(/backgroundSrc=\{hero_bg_[a-f0-9]{8}\}/);
 	});
 
+	// Binding form (default/named) and module system (esm/cjs) are
+	// independent axes in `renderImport`. The other three combinations are
+	// asserted above and in emitter.test.ts; this pins the fourth so the
+	// 2x2 collapse cannot regress the CJS asset-import shape.
+	it("static-import emits a require() binding under cjs", () => {
+		const result = emitReact(
+			irWithHeroSrc("/assets/hero-bg.jpg"),
+			resolveReactExportOptions({
+				assetStrategy: "static-import",
+				moduleResolution: "cjs",
+			}),
+		);
+		expect(result.code).toMatch(
+			/const hero_bg_[a-f0-9]{8} = require\("\.\/assets\/hero-bg\.jpg"\);/,
+		);
+		expect(result.code).toMatch(/backgroundSrc=\{hero_bg_[a-f0-9]{8}\}/);
+	});
+
 	it("static-import rewrites nested asset props inside composite prop values", () => {
 		const ir: PageIR = {
 			version: "1",
