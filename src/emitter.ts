@@ -46,21 +46,20 @@ function indent(depth: number): string {
 	return INDENT.repeat(depth);
 }
 
+// Binding form and module system are independent, so the four import
+// shapes are a 2x2 product rather than four separate templates:
+//   default/named -> `X` or `{ X }`,  esm/cjs -> `import ... from S;`
+//   or `const ... = require(S);`.
 function renderImport(
 	record: ImportRecord,
 	moduleSystem: "esm" | "cjs",
 ): string {
-	if (moduleSystem === "cjs") {
-		if (record.kind === "default") {
-			return `const ${record.binding} = require(${JSON.stringify(record.source)});`;
-		}
-		return `const { ${record.binding} } = require(${JSON.stringify(record.source)});`;
-	}
-
-	if (record.kind === "default") {
-		return `import ${record.binding} from ${JSON.stringify(record.source)};`;
-	}
-	return `import { ${record.binding} } from ${JSON.stringify(record.source)};`;
+	const source = JSON.stringify(record.source);
+	const clause =
+		record.kind === "default" ? record.binding : `{ ${record.binding} }`;
+	return moduleSystem === "cjs"
+		? `const ${clause} = require(${source});`
+		: `import ${clause} from ${source};`;
 }
 
 function renderImports(
@@ -68,14 +67,9 @@ function renderImports(
 	assetImports: readonly ImportRecord[],
 	moduleSystem: "esm" | "cjs",
 ): string {
-	const rendered: string[] = [];
-	for (const record of manifest.imports) {
-		rendered.push(renderImport(record, moduleSystem));
-	}
-	for (const record of assetImports) {
-		rendered.push(renderImport(record, moduleSystem));
-	}
-	return rendered.join("\n");
+	return [...manifest.imports, ...assetImports]
+		.map((record) => renderImport(record, moduleSystem))
+		.join("\n");
 }
 
 function renderAttribute(
