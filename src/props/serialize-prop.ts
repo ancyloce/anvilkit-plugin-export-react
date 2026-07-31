@@ -27,17 +27,37 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 	return proto === Object.prototype || proto === null;
 }
 
-function describeUnserializableValue(value: unknown): string {
-	if (typeof value === "function") return "function";
+/**
+ * Classify a value the JSON pipeline cannot represent: returns the label
+ * used in the warning message, or `null` when the value is serializable.
+ *
+ * One classification drives both the detection walk and the placeholder
+ * message, so there is no second list of types to keep in sync. `null`
+ * and plain objects/arrays are serializable and report `null` here; the
+ * placeholder path renders those as `"unknown"`.
+ */
+function describeUnserializable(value: unknown): string | null {
+	switch (typeof value) {
+		case "function":
+			return "function";
+		case "symbol":
+			return "symbol";
+		case "bigint":
+			return "bigint";
+		case "undefined":
+			return "undefined";
+		case "object":
+			break;
+		default:
+			return null;
+	}
+
 	if (value instanceof Date) return "Date";
 	if (value instanceof Map) return "Map";
 	if (value instanceof Set) return "Set";
 	if (value instanceof RegExp) return "RegExp";
 	if (value instanceof Promise) return "Promise";
-	if (typeof value === "symbol") return "symbol";
-	if (typeof value === "bigint") return "bigint";
-	if (typeof value === "undefined") return "undefined";
-	return "unknown";
+	return null;
 }
 
 // JSX attribute-string mode does NOT process JS-style escape sequences \u2014
@@ -143,27 +163,6 @@ function serializeComposite(
 	return { value: `{${json}}`, warnings: [] };
 }
 
-function isUnserializable(value: unknown): boolean {
-	if (value === null) return false;
-	const t = typeof value;
-	if (
-		t === "function" ||
-		t === "symbol" ||
-		t === "bigint" ||
-		t === "undefined"
-	) {
-		return true;
-	}
-	if (t !== "object") return false;
-	return (
-		value instanceof Date ||
-		value instanceof Map ||
-		value instanceof Set ||
-		value instanceof RegExp ||
-		value instanceof Promise
-	);
-}
-
 function detectUnserializable(
 	value: unknown,
 	warnings: ExportWarning[],
@@ -171,13 +170,14 @@ function detectUnserializable(
 	seen: WeakSet<object>,
 ): void {
 	if (value === null) return;
-	if (isUnserializable(value)) {
+	const unserializableKind = describeUnserializable(value);
+	if (unserializableKind !== null) {
 		warnings.push({
 			level: "warn",
 			code: "NON_SERIALIZABLE_PROP",
 			message: `Prop \`${
 				opts?.propName ?? "?"
-			}\` contains a non-serializable ${describeUnserializableValue(value)}.`,
+			}\` contains a non-serializable ${unserializableKind}.`,
 			...(opts?.nodeId ? { nodeId: opts.nodeId } : {}),
 		});
 		return;
@@ -228,9 +228,9 @@ function nonSerializablePlaceholder(
 			{
 				level: "warn",
 				code: "NON_SERIALIZABLE_PROP",
-				message: `Prop \`${opts?.propName ?? "?"}\` is a ${describeUnserializableValue(
-					value,
-				)} and cannot be emitted as JSX.`,
+				message: `Prop \`${opts?.propName ?? "?"}\` is a ${
+					describeUnserializable(value) ?? "unknown"
+				} and cannot be emitted as JSX.`,
 				...(opts?.nodeId ? { nodeId: opts.nodeId } : {}),
 			},
 		],
