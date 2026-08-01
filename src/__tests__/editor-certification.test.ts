@@ -25,7 +25,7 @@
 import { compilePlugins, StudioConfigSchema } from "@anvilkit/core";
 import {
 	createEmptyAuthoringState,
-	listUsedAuthoringFeatures,
+	listUsedEditorFeatures,
 	runExportPreflight,
 } from "@anvilkit/core/editor";
 import type { StudioPluginContext } from "@anvilkit/core/types";
@@ -203,6 +203,41 @@ const SUPPORTED = [
 
 const UNSUPPORTED = ["interactions", "bindings"] as const;
 
+/**
+ * A document whose only editor feature is rich text — stored where it
+ * really lives, in component props, exactly as the shared inline
+ * pipeline writes it (`{version:"1",type:"doc",content}` wrapped in an
+ * `InlineTextValue`). Nothing about it is declared: the feature list
+ * under test is derived from this object.
+ */
+function richTextDocument() {
+	return {
+		root: { props: {} },
+		content: [
+			{
+				type: "Hero",
+				props: {
+					id: "hero-1",
+					headline: {
+						format: "tiptap",
+						value: {
+							version: "1",
+							type: "doc",
+							content: [
+								{
+									type: "paragraph",
+									content: [{ type: "text", text: "Ship faster" }],
+								},
+							],
+						},
+					},
+				},
+			},
+		],
+		zones: {},
+	};
+}
+
 describe("editor capability declaration (wave 2)", () => {
 	it("declares exactly the certified feature set", () => {
 		// Nothing enters this list ahead of its positive fixture below.
@@ -240,7 +275,7 @@ describe("editor capability declaration (wave 2)", () => {
 describe("used-feature preflight (§23.2)", () => {
 	for (const feature of SUPPORTED) {
 		it(`passes production export for a document using "${feature}"`, () => {
-			const usedFeatures = listUsedAuthoringFeatures(authoringUsing(feature));
+			const usedFeatures = listUsedEditorFeatures(authoringUsing(feature));
 			expect(usedFeatures).toContain(feature);
 			const result = runExportPreflight({
 				usedFeatures,
@@ -254,7 +289,7 @@ describe("used-feature preflight (§23.2)", () => {
 
 	for (const feature of UNSUPPORTED) {
 		it(`blocks production export for a document using "${feature}"`, () => {
-			const usedFeatures = listUsedAuthoringFeatures(authoringUsing(feature));
+			const usedFeatures = listUsedEditorFeatures(authoringUsing(feature));
 			expect(usedFeatures).toContain(feature);
 			const result = runExportPreflight({
 				usedFeatures,
@@ -268,21 +303,50 @@ describe("used-feature preflight (§23.2)", () => {
 		});
 	}
 
-	it("blocks richText, which stays deliberately undeclared", () => {
+	it("blocks a real rich-text document, detected automatically", () => {
 		// `TiptapDocumentV1` props would serialize as object literals the
-		// target components cannot render, so declaring it would be a
-		// lie. (Sidecar scanning cannot detect richText usage today —
-		// asserted with the literal id so the gate is ready when it can.)
+		// target components cannot render, so declaring `richText` would
+		// be a lie — and until detection scanned component props, this
+		// document reported ZERO used features and exported cleanly
+		// through this format. The feature list is derived from the
+		// document here, never hand-written (DD-DEC-018; CORE-P3-009).
+		const usedFeatures = listUsedEditorFeatures(
+			createEmptyAuthoringState(),
+			richTextDocument(),
+		);
+		expect(usedFeatures).toEqual(["richText"]);
+
 		const result = runExportPreflight({
-			usedFeatures: ["richText"],
+			usedFeatures,
 			capabilities: reactFormat.editorCapabilities,
 		});
 		expect(result.status).toBe("blocked");
+		expect(result.errors.map((error) => error.code)).toContain(
+			"EDITOR_EXPORTER_UNSUPPORTED",
+		);
+		expect(result.event.status).toBe("failed");
+	});
+
+	it("degrades the same rich-text document to a warning in development", () => {
+		// §23.2's documented asymmetry: the author keeps previewing and
+		// sees a persistent notice; only production blocks.
+		const result = runExportPreflight({
+			usedFeatures: listUsedEditorFeatures(
+				createEmptyAuthoringState(),
+				richTextDocument(),
+			),
+			capabilities: reactFormat.editorCapabilities,
+			mode: "development",
+		});
+		expect(result.status).toBe("warning");
+		expect(result.errors.every((error) => error.severity === "warning")).toBe(
+			true,
+		);
 	});
 
 	it("degrades to a warning in development preview rather than blocking", () => {
 		const result = runExportPreflight({
-			usedFeatures: listUsedAuthoringFeatures(authoringUsing("interactions")),
+			usedFeatures: listUsedEditorFeatures(authoringUsing("interactions")),
 			capabilities: reactFormat.editorCapabilities,
 			mode: "development",
 		});
@@ -294,7 +358,7 @@ describe("used-feature preflight (§23.2)", () => {
 
 	it("passes a document that uses no editor features", () => {
 		const result = runExportPreflight({
-			usedFeatures: listUsedAuthoringFeatures(createEmptyAuthoringState()),
+			usedFeatures: listUsedEditorFeatures(createEmptyAuthoringState()),
 			capabilities: reactFormat.editorCapabilities,
 		});
 		expect(result.status).toBe("passed");
@@ -305,7 +369,7 @@ describe("used-feature preflight (§23.2)", () => {
 	it("an assessed-empty declaration still blocks what this format passes", () => {
 		// DD-DEC-018's fail-closed default, kept visible now that this
 		// format declares real support.
-		const usedFeatures = listUsedAuthoringFeatures(authoringUsing("tokens"));
+		const usedFeatures = listUsedEditorFeatures(authoringUsing("tokens"));
 		expect(
 			runExportPreflight({
 				usedFeatures,
