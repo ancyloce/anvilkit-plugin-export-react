@@ -4,6 +4,7 @@ import type {
 } from "@anvilkit/core/types";
 
 import { resolveReactAssetUrls } from "../assets/assets.js";
+import { applyCompiledAppearance } from "../editor/compiled-transform.js";
 import { emitReact } from "../emitter.js";
 import {
 	type ReactExportOptions,
@@ -62,7 +63,18 @@ export const reactFormat: ExportFormatDefinition<ReactExportOptions> = {
 			resolvedIr.root.props.__anvilkit === undefined
 				? undefined
 				: (await import("../editor/apply.js")).applyAuthoring(resolvedIr);
-		const { code, warnings } = emitReact(authored?.ir ?? resolvedIr, resolved);
+		// v2 documents (PLAN-0025 §9.3, P4-06): the export runner compiled
+		// the exact exported document through the unified appearance
+		// compiler; emit its CSS artifact and target attributes instead of
+		// resolving node styles independently. Pure IR rewrite — no editor
+		// engine load, so the entry chunk stays budget-clean.
+		const compiled = runCtx?.compiledAppearance;
+		const authoredIr = authored?.ir ?? resolvedIr;
+		const finalIr =
+			compiled === undefined
+				? authoredIr
+				: applyCompiledAppearance(authoredIr, compiled);
+		const { code, warnings } = emitReact(finalIr, resolved);
 		const extension = resolved.syntax === "jsx" ? "jsx" : "tsx";
 		return {
 			content: code,
