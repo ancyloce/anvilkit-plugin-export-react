@@ -29,7 +29,7 @@ import {
  * de-duplicating the run pipeline out of `plugin.ts`.
  *
  * Still unsupported, and therefore still blocking (DD-DEC-018):
- * - `richText` — `TiptapDocumentV1` props would serialize as object
+ * - `richText` — `TiptapDocument` props would serialize as object
  *   literals the target components cannot render;
  * - `interactions` / `bindings` — runtime behaviour the emitted
  *   static page cannot carry.

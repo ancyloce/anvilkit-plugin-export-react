@@ -304,7 +304,7 @@ describe("used-feature preflight (§23.2)", () => {
 	}
 
 	it("blocks a real rich-text document, detected automatically", () => {
-		// `TiptapDocumentV1` props would serialize as object literals the
+		// `TiptapDocument` props would serialize as object literals the
 		// target components cannot render, so declaring `richText` would
 		// be a lie — and until detection scanned component props, this
 		// document reported ZERO used features and exported cleanly
