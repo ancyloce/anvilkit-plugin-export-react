@@ -41,7 +41,7 @@
 	},
 	"peerDependencies": {
 		"@anvilkit/core": "^0.1.4",
-		"@puckeditor/core": "^0.22.4",
+		"@puckeditor/core": "^0.23.0",
 		"react": ">=19.0.0"
 	},
 	"peerDependenciesMeta": {
@@ -76,18 +76,18 @@
 		"@anvilkit/core": "workspace:*",
 		"@anvilkit/typescript-config": "workspace:*",
 		"@anvilkit/vitest-config": "workspace:*",
-		"@puckeditor/core": "^0.22.4",
+		"@puckeditor/core": "^0.23.0",
 		"@rslib/core": "^0.23.2",
-		"@types/node": "^26.1.1",
+		"@types/node": "^26.2.0",
 		"@typescript-eslint/typescript-estree": "^8.0.0",
 		"esbuild": "^0.28.1",
 		"madge": "^8.0.0",
-		"publint": "^0.3.22",
+		"publint": "^0.3.23",
 		"react": "^19.2.8",
 		"typescript": "7.0.2",
 		"vitest": "^4.1.10"
 	},
 	"dependencies": {
-		"lucide-react": "^1.28.0"
+		"lucide-react": "^1.30.0"
 	}
 }
