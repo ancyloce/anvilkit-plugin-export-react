@@ -16,17 +16,25 @@ import {
  * DD-DEC-018; PLAN-0020 CORE-P2-012 — exporter certification wave 2;
  * REVIEW-0019 P0).
  *
- * Every id listed here is backed by real emitter work **and a
- * positive certification fixture** in `editor-certification.test.ts`
- * — nothing enters this list ahead of its fixture. The emission path
- * is the shared core consumer (`buildExportAuthoring`) plus an IR
- * transform (`editor/authored-transform.ts`): authored styles ride
- * in as a `<style>` element over `data-ak-node` div wrappers, and
- * component instances render as their materialized §24.4 subtrees.
- * The editor path loads through a dynamic `import()` in `run` and
- * shares nothing with the sync graph, so the engine stays out of the
- * entry chunk; this literal is the entry-side cost, paid for by
- * de-duplicating the run pipeline out of `plugin.ts`.
+ * The emission path is the ONE compiled-appearance pipeline the
+ * editor, preview and production rendering already consume: the
+ * export runner compiles the exported document and hands this format
+ * `runCtx.compiledAppearance`, and `editor/compiled-transform.ts`
+ * rewrites the IR so the existing emitter renders it — the compiled
+ * stylesheet as a leading `data-anvilkit-appearance` `<style>` node
+ * over `data-ak-style-node` / `data-ak-style-target="root"` wrappers.
+ * It is a pure IR rewrite with type-only core imports, so no editor
+ * engine reaches the entry chunk.
+ *
+ * **`localComponents` and `variants` are declared but NOT re-certified
+ * (`p6-001` → `p8-007`, `ED-FA-014`).** Their only emission path was
+ * the sidecar transform this task deleted — the identical dependency
+ * that caused the HTML format to withdraw both ids on 2026-08-06
+ * (see `plugin-export-html/src/format/format-definition.ts`). The
+ * withdraw-or-certify decision needs a **carrier-document proof**,
+ * which is a test, and PLAN-0028 §2 defers tests to P8; `p8-007` owns
+ * it. Until then, treat these two ids as an unproven claim, not as
+ * certified support.
  *
  * Still unsupported, and therefore still blocking (DD-DEC-018):
  * - `richText` — `TiptapDocument` props would serialize as object
@@ -56,34 +64,24 @@ export const reactFormat: ExportFormatDefinition<ReactExportOptions> = {
 		const resolved = resolveReactExportOptions(options);
 		const { ir: resolvedIr, warnings: resolutionWarnings } =
 			await resolveReactAssetUrls(ir, runCtx?.assetResolvers ?? []);
-		// Editor authoring rides on `root.props.__anvilkit`; only then is
-		// the editor chunk loaded, and documents without it emit
-		// byte-identically to the pre-editor output.
-		const authored =
-			resolvedIr.root.props.__anvilkit === undefined
-				? undefined
-				: (await import("../editor/apply.js")).applyAuthoring(resolvedIr);
-		// v2 documents (PLAN-0025 §9.3, P4-06): the export runner compiled
-		// the exact exported document through the unified appearance
-		// compiler; emit its CSS artifact and target attributes instead of
-		// resolving node styles independently. Pure IR rewrite — no editor
-		// engine load, so the entry chunk stays budget-clean.
+		// The export runner compiled the exact exported document through
+		// the ONE unified appearance compiler and handed the artifact
+		// here; emit its CSS and target attributes rather than resolving
+		// node styles independently. A document the runner did not compile
+		// carries no appearance, and emits byte-identically to the
+		// pre-editor output. Pure IR rewrite — no editor engine load, so
+		// the entry chunk stays budget-clean.
 		const compiled = runCtx?.compiledAppearance;
-		const authoredIr = authored?.ir ?? resolvedIr;
 		const finalIr =
 			compiled === undefined
-				? authoredIr
-				: applyCompiledAppearance(authoredIr, compiled);
+				? resolvedIr
+				: applyCompiledAppearance(resolvedIr, compiled);
 		const { code, warnings } = emitReact(finalIr, resolved);
 		const extension = resolved.syntax === "jsx" ? "jsx" : "tsx";
 		return {
 			content: code,
 			filename: `page.${extension}`,
-			warnings: [
-				...resolutionWarnings,
-				...warnings,
-				...(authored?.warnings ?? []),
-			],
+			warnings: [...resolutionWarnings, ...warnings],
 		};
 	},
 };

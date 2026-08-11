@@ -1,12 +1,11 @@
 /**
- * @file P4-06 (PLAN-0025 §9.3) — v2 compiled-appearance IR transform
- * for the React exporter.
+ * @file The compiled-appearance IR transform for the React exporter —
+ * this format's ONLY appearance path since `p6-001`.
  *
  * The export runner compiles the exported document through the ONE
  * unified appearance compiler and hands this format the artifact on
  * its run context; this transform rewrites the IR so the existing
- * emitter renders it with no per-node special cases — mirroring the
- * legacy `applyExportAuthoring` shape:
+ * emitter renders it with no per-node special cases:
  *
  * - nodes the compiler styled on their `root` target are wrapped in a
  *   `div` carrying the compiler's selector attribute PAIR
