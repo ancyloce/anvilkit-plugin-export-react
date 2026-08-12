@@ -4,6 +4,7 @@ import {
 	type AssetRewrite,
 	collectReactAssets,
 	isAssetPropKey,
+	walkAssetValue,
 } from "./assets/assets.js";
 import { collectImports } from "./imports/collect-imports.js";
 import { serializeProp } from "./props/serialize-prop.js";
@@ -108,7 +109,7 @@ function serializePropWithAssetRewrites(
 	nodeId: string,
 	ctx: EmitContext,
 ): string | null {
-	if (!hasAssetRewrite(value, key, ctx.assetRewrites, new WeakSet())) {
+	if (!hasAssetRewrite(value, key, ctx.assetRewrites)) {
 		return null;
 	}
 
@@ -127,38 +128,26 @@ function serializePropWithAssetRewrites(
 	)}}`;
 }
 
+/**
+ * Does any asset-keyed string under `value` have a rewrite binding?
+ *
+ * Reuses `walkAssetValue` — the same traversal `collectReactAssets`
+ * used to build `assetRewrites` — rather than restating which keys
+ * count and how arrays/nested objects recurse. Its empty-string skip is
+ * a no-op here: the rewrite table is keyed by URLs that walker itself
+ * yielded, so `""` can never be a key.
+ */
 function hasAssetRewrite(
 	value: unknown,
-	key: string | undefined,
+	key: string,
 	assetRewrites: ReadonlyMap<string, AssetRewrite>,
-	seen: WeakSet<object>,
 ): boolean {
-	if (Array.isArray(value)) {
-		if (seen.has(value)) {
-			return false;
+	for (const { url } of walkAssetValue(value, "", key)) {
+		if (assetRewrites.has(url)) {
+			return true;
 		}
-		seen.add(value);
-		return value.some((entry) =>
-			hasAssetRewrite(entry, undefined, assetRewrites, seen),
-		);
 	}
-
-	if (typeof value === "string") {
-		return key !== undefined && isAssetPropKey(key) && assetRewrites.has(value);
-	}
-
-	if (value === null || typeof value !== "object") {
-		return false;
-	}
-	if (seen.has(value)) {
-		return false;
-	}
-	seen.add(value);
-
-	return Object.entries(value as Record<string, unknown>).some(
-		([entryKey, entryValue]) =>
-			hasAssetRewrite(entryValue, entryKey, assetRewrites, seen),
-	);
+	return false;
 }
 
 function serializeJsExpressionWithAssetRewrites(

@@ -17,6 +17,22 @@ const DEFAULT_HEADER_ACTION: Omit<StudioHeaderAction, "onClick"> = {
 };
 
 /**
+ * Ask the host to run the export itself: log why this action could not
+ * run it, then broadcast `anvilkit:export:request`. Both the bound and
+ * the unbound action fall back through here, so the event name and
+ * payload shape are stated once.
+ */
+function requestHostExport(
+	ctx: StudioPluginContext,
+	formatId: string,
+	options: ReactExportOptions,
+	remedy: string,
+): void {
+	ctx.log("info", `React export requested. ${remedy}`);
+	ctx.emit("anvilkit:export:request", { formatId, options });
+}
+
+/**
  * Build a header action whose `onClick` actually runs the bound React
  * export format and broadcasts the result.
  *
@@ -37,16 +53,14 @@ export function createExportReactHeaderAction(
 		...DEFAULT_HEADER_ACTION,
 		onClick: async (ctx: StudioPluginContext) => {
 			if (!buildIR) {
-				ctx.log(
-					"info",
-					"React export requested. Pass a buildIR option to createReactExportPlugin " +
+				requestHostExport(
+					ctx,
+					format.id,
+					options,
+					"Pass a buildIR option to createReactExportPlugin " +
 						"to run the export end-to-end, or listen for the anvilkit:export:request " +
 						"event to handle it from the host.",
 				);
-				ctx.emit("anvilkit:export:request", {
-					formatId: format.id,
-					options,
-				});
 				return;
 			}
 
@@ -80,11 +94,12 @@ export function createExportReactHeaderAction(
 export const exportReactHeaderAction: StudioHeaderAction = {
 	...DEFAULT_HEADER_ACTION,
 	onClick: async (ctx) => {
-		ctx.log(
-			"info",
-			"React export requested. Use createReactExportPlugin() to obtain a header " +
+		requestHostExport(
+			ctx,
+			"react",
+			{},
+			"Use createReactExportPlugin() to obtain a header " +
 				"action wired to a concrete format and options.",
 		);
-		ctx.emit("anvilkit:export:request", { formatId: "react", options: {} });
 	},
 };

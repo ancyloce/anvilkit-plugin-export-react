@@ -87,17 +87,6 @@ function describeUnserializable(value: unknown): string | null {
 // JSX expression so the JS lexer parses it instead.
 const JSX_ATTRIBUTE_STRING_UNSAFE = /[\n\r\t\u2028\u2029\\&<>{}]/;
 
-function needsJsxExpressionForm(value: string): boolean {
-	return JSX_ATTRIBUTE_STRING_UNSAFE.test(value);
-}
-
-function escapeStringForAttribute(value: string): string {
-	// Safe path: no characters that JSX attribute-string mode mishandles.
-	// Only `"` itself needs escaping for the surrounding double-quote
-	// delimiter.
-	return value.replace(/"/g, "&quot;");
-}
-
 /**
  * Serialize a single prop value into its JSX attribute-value form.
  *
@@ -129,10 +118,12 @@ export function serializeProp(
 
 	switch (typeof value) {
 		case "string":
-			if (needsJsxExpressionForm(value)) {
+			if (JSX_ATTRIBUTE_STRING_UNSAFE.test(value)) {
 				return { value: `{${JSON.stringify(value)}}`, warnings: [] };
 			}
-			return { value: `"${escapeStringForAttribute(value)}"`, warnings: [] };
+			// Safe path: no characters JSX attribute-string mode mishandles,
+			// so only `"` needs escaping for the surrounding delimiter.
+			return { value: `"${value.replace(/"/g, "&quot;")}"`, warnings: [] };
 		case "number": {
 			if (Number.isFinite(value)) {
 				return { value: `{${String(value)}}`, warnings: [] };

@@ -83,63 +83,65 @@ export const REACT_EXPORT_DEFAULTS: ResolvedReactExportOptions = {
 };
 
 /**
+ * Validation rules, in the order options are checked — an options bag
+ * with several invalid fields reports the first one in this list. A
+ * `null` rule means "boolean"; anything else is the allowed literal
+ * set. Table-driven so the default-then-validate step is written once
+ * rather than once per option.
+ */
+const OPTION_RULES: readonly (readonly [
+	keyof ResolvedReactExportOptions,
+	readonly string[] | null,
+])[] = [
+	["syntax", ["tsx", "jsx"]],
+	["moduleResolution", ["esm", "cjs"]],
+	["includeImports", null],
+	["assetStrategy", ["static-import", "url-prop"]],
+];
+
+/**
  * Apply `REACT_EXPORT_DEFAULTS` to a partial options bag.
  */
 export function resolveReactExportOptions(
 	opts?: ReactExportOptions,
 ): ResolvedReactExportOptions {
-	const syntax =
-		opts?.syntax === undefined ? REACT_EXPORT_DEFAULTS.syntax : opts.syntax;
-	assertEnumOption("syntax", syntax, ["tsx", "jsx"]);
+	const resolved: Record<string, unknown> = {};
 
-	const moduleResolution =
-		opts?.moduleResolution === undefined
-			? REACT_EXPORT_DEFAULTS.moduleResolution
-			: opts.moduleResolution;
-	assertEnumOption("moduleResolution", moduleResolution, ["esm", "cjs"]);
-
-	const includeImports =
-		opts?.includeImports === undefined
-			? REACT_EXPORT_DEFAULTS.includeImports
-			: opts.includeImports;
-	if (typeof includeImports !== "boolean") {
-		throw new TypeError(
-			`Invalid React export option "includeImports": expected a boolean, received ${describeOptionValue(
-				includeImports,
-			)}.`,
-		);
+	for (const [name, allowed] of OPTION_RULES) {
+		const supplied = opts?.[name];
+		const value =
+			supplied === undefined ? REACT_EXPORT_DEFAULTS[name] : supplied;
+		assertOption(name, value, allowed);
+		resolved[name] = value;
 	}
 
-	const assetStrategy =
-		opts?.assetStrategy === undefined
-			? REACT_EXPORT_DEFAULTS.assetStrategy
-			: opts.assetStrategy;
-	assertEnumOption("assetStrategy", assetStrategy, [
-		"static-import",
-		"url-prop",
-	]);
-
-	return {
-		syntax,
-		moduleResolution,
-		includeImports,
-		assetStrategy,
-	};
+	return resolved as unknown as ResolvedReactExportOptions;
 }
 
-function assertEnumOption<T extends string>(
+/**
+ * Throw a `TypeError` unless `value` satisfies `allowed` (a literal
+ * set, or `null` for boolean). Both rule kinds share one message
+ * template — they differ only in the "expected" clause.
+ */
+function assertOption(
 	name: string,
 	value: unknown,
-	allowed: readonly T[],
-): asserts value is T {
-	if (typeof value === "string" && allowed.includes(value as T)) {
+	allowed: readonly string[] | null,
+): void {
+	if (
+		allowed === null
+			? typeof value === "boolean"
+			: typeof value === "string" && allowed.includes(value)
+	) {
 		return;
 	}
 
+	const expected =
+		allowed === null
+			? "a boolean"
+			: allowed.map((entry) => JSON.stringify(entry)).join(" | ");
 	throw new TypeError(
-		`Invalid React export option "${name}": expected ${allowed
-			.map((entry) => JSON.stringify(entry))
-			.join(" | ")}, received ${describeOptionValue(value)}.`,
+		`Invalid React export option "${name}": expected ${expected}, received ${describeOptionValue(value)}.`,
 	);
 }
 

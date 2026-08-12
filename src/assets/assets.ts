@@ -134,7 +134,11 @@ function hasTraversalSegment(url: string): boolean {
  */
 const UNSAFE_SCHEME_PATTERN = /^[A-Za-z][A-Za-z0-9+.-]*:/;
 
-function isAssetProp(key: string): boolean {
+/**
+ * Detect whether a given prop name participates in the asset
+ * substitution pass. Also consumed by the emitter.
+ */
+export function isAssetPropKey(key: string): boolean {
 	return ASSET_PROP_KEYS.has(key);
 }
 
@@ -259,7 +263,13 @@ function* walkAssetProps(node: PageIRNode): IterableIterator<{
 	}
 }
 
-function* walkAssetValue(
+/**
+ * Yield every asset-keyed non-empty string reachable from `value`,
+ * guarding against cycles. Exported for the emitter's rewrite probe so
+ * the traversal rules (which keys count, how arrays and nested objects
+ * recurse) are stated exactly once.
+ */
+export function* walkAssetValue(
 	value: unknown,
 	nodeId: string,
 	key?: string,
@@ -281,7 +291,7 @@ function* walkAssetValue(
 	}
 
 	if (typeof value === "string") {
-		if (key !== undefined && isAssetProp(key) && value !== "") {
+		if (key !== undefined && isAssetPropKey(key) && value !== "") {
 			yield { nodeId, propName: key, url: value };
 		}
 		return;
@@ -407,12 +417,6 @@ export function collectReactAssets(
 	};
 }
 
-/** Exposed for the emitter — detect whether a given prop name should
- *  participate in the asset substitution pass. */
-export function isAssetPropKey(name: string): boolean {
-	return isAssetProp(name);
-}
-
 async function resolveWithResolvers(
 	url: string,
 	assetResolvers: readonly IRAssetResolver[],
@@ -534,7 +538,7 @@ function cloneValue(
 	}
 
 	if (typeof value === "string") {
-		if (key === undefined || !isAssetProp(key)) {
+		if (key === undefined || !isAssetPropKey(key)) {
 			return value;
 		}
 
