@@ -109,6 +109,73 @@ describe("emitReact — nested + sibling children", () => {
 		expect(result.code).toContain("  </Section>");
 	});
 
+	// Pins the block-layout branch: props flip to one-per-line only when
+	// the inline form exceeds MAX_INLINE_PROP_WIDTH (72) *and* more than
+	// one attribute renders. A single long prop must stay inline.
+	it("breaks props onto their own lines past the inline width, closing at the node indent", () => {
+		const ir: PageIR = {
+			version: "1",
+			root: {
+				id: "root",
+				type: "__root__",
+				props: {},
+				children: [
+					{
+						id: "wide",
+						type: "Hero",
+						props: {
+							title:
+								"A fairly long headline value that pushes past the inline width",
+							subtitle: "second attr",
+						},
+					},
+					{ id: "narrow", type: "Card", props: { a: "short" } },
+				],
+			},
+			assets: [],
+			metadata: {},
+		};
+		const result = emitReact(ir, REACT_EXPORT_DEFAULTS);
+		expect(result.code).toContain(
+			[
+				"      <Hero",
+				'        title="A fairly long headline value that pushes past the inline width"',
+				'        subtitle="second attr"',
+				"      />",
+			].join("\n"),
+		);
+		// Short + single-attribute nodes keep the inline form.
+		expect(result.code).toContain('<Card a="short" />');
+		expect(result.warnings).toEqual([]);
+	});
+
+	it("keeps a single over-long prop inline", () => {
+		const ir: PageIR = {
+			version: "1",
+			root: {
+				id: "root",
+				type: "__root__",
+				props: {},
+				children: [
+					{
+						id: "one",
+						type: "Hero",
+						props: {
+							title:
+								"A single attribute that is comfortably longer than the inline width threshold",
+						},
+					},
+				],
+			},
+			assets: [],
+			metadata: {},
+		};
+		const result = emitReact(ir, REACT_EXPORT_DEFAULTS);
+		expect(result.code).toContain(
+			'<Hero title="A single attribute that is comfortably longer than the inline width threshold" />',
+		);
+	});
+
 	it("wraps sibling root children in a fragment", () => {
 		const ir: PageIR = {
 			version: "1",

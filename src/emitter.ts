@@ -150,75 +150,70 @@ function hasAssetRewrite(
 	return false;
 }
 
+/**
+ * Render `value` as a JS expression, substituting an asset binding
+ * identifier for any asset-keyed string that has one.
+ *
+ * Only composites and rewritten strings need bespoke handling —
+ * every other case is exactly `JSON.stringify`, including the two the
+ * previous per-type switch spelled out by hand: a non-finite number
+ * stringifies to `"null"`, and a symbol/function/`undefined` yields
+ * `undefined`, which the `?? "null"` restores to the same placeholder
+ * the old `default` branch produced. `bigint` is the one input
+ * `JSON.stringify` throws on rather than skipping, so it keeps an
+ * explicit arm.
+ */
 function serializeJsExpressionWithAssetRewrites(
 	value: unknown,
 	key: string | undefined,
 	assetRewrites: ReadonlyMap<string, AssetRewrite>,
 ): string {
-	if (value === null) {
-		return "null";
+	if (typeof value === "string" && key !== undefined && isAssetPropKey(key)) {
+		const rewrite = assetRewrites.get(value);
+		if (rewrite) {
+			return rewrite.binding;
+		}
 	}
 
-	switch (typeof value) {
-		case "string": {
-			const rewrite =
-				key !== undefined && isAssetPropKey(key)
-					? assetRewrites.get(value)
-					: undefined;
-			return rewrite ? rewrite.binding : JSON.stringify(value);
-		}
-		case "number":
-			return Number.isFinite(value) ? String(value) : "null";
-		case "boolean":
-			return value ? "true" : "false";
-		case "object":
-			if (Array.isArray(value)) {
-				return `[${value
-					.map((entry) =>
-						serializeJsExpressionWithAssetRewrites(
-							entry,
-							undefined,
-							assetRewrites,
-						),
-					)
-					.join(",")}]`;
-			}
-			return `{${Object.entries(value as Record<string, unknown>)
-				.map(
-					([entryKey, entryValue]) =>
-						`${JSON.stringify(entryKey)}:${serializeJsExpressionWithAssetRewrites(
-							entryValue,
-							entryKey,
-							assetRewrites,
-						)}`,
-				)
-				.join(",")}}`;
-		default:
-			return "null";
+	if (Array.isArray(value)) {
+		return `[${value
+			.map((entry) =>
+				serializeJsExpressionWithAssetRewrites(entry, undefined, assetRewrites),
+			)
+			.join(",")}]`;
 	}
+
+	if (value !== null && typeof value === "object") {
+		return `{${Object.entries(value as Record<string, unknown>)
+			.map(
+				([entryKey, entryValue]) =>
+					`${JSON.stringify(entryKey)}:${serializeJsExpressionWithAssetRewrites(
+						entryValue,
+						entryKey,
+						assetRewrites,
+					)}`,
+			)
+			.join(",")}}`;
+	}
+
+	return (
+		(typeof value === "bigint" ? undefined : JSON.stringify(value)) ?? "null"
+	);
 }
 
+/**
+ * Render each prop to its `key=value` segment, dropping the ones
+ * `renderAttribute` rejected. Layout (inline vs one-per-line) is the
+ * caller's choice, so only the chosen form is ever built.
+ */
 function renderProps(
 	node: PageIRNode,
 	depth: number,
 	ctx: EmitContext,
-): { readonly inline: string; readonly block: string; readonly count: number } {
-	const entries = Object.entries(node.props);
-	if (entries.length === 0) {
-		return { inline: "", block: "", count: 0 };
-	}
-
-	const parts = entries
+): readonly string[] {
+	return Object.entries(node.props)
 		.map(([key, value]) => renderAttribute(key, value, node.id, ctx))
 		.filter((part): part is string => part !== null);
-
-	const inline = parts.length > 0 ? ` ${parts.join(" ")}` : "";
-	const blockIndent = indent(depth + 1);
-	const block =
-		parts.length > 0
-			? `\n${parts.map((part) => `${blockIndent}${part}`).join("\n")}\n${indent(depth)}`
-			: "";
-	return { inline, block, count: parts.length };
 }
 
 function renderNode(node: PageIRNode, depth: number, ctx: EmitContext): string {
@@ -232,11 +227,14 @@ function renderNode(node: PageIRNode, depth: number, ctx: EmitContext): string {
 		});
 		return `${pad}{/* omitted: invalid component type */}`;
 	}
-	const { inline, block, count } = renderProps(node, depth, ctx);
+	const parts = renderProps(node, depth, ctx);
 
 	const hasChildren = Array.isArray(node.children) && node.children.length > 0;
+	const inline = parts.length > 0 ? ` ${parts.join(" ")}` : "";
 	const propSegment =
-		inline.length > MAX_INLINE_PROP_WIDTH && count > 1 ? block : inline;
+		inline.length > MAX_INLINE_PROP_WIDTH && parts.length > 1
+			? `\n${parts.map((part) => `${indent(depth + 1)}${part}`).join("\n")}\n${pad}`
+			: inline;
 
 	if (!hasChildren) {
 		const closing = propSegment.endsWith("\n" + pad) ? "/>" : " />";
