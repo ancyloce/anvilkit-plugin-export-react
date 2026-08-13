@@ -527,16 +527,25 @@ function cloneAsset(
 	};
 }
 
+/**
+ * Detach a value from the input IR, substituting asset rewrites as it
+ * goes: an asset-keyed string is blanked when blocked and swapped when
+ * rewritten; everything else is copied structurally.
+ *
+ * `seen` makes repeated and cyclic references terminate, returning the
+ * one clone per source object. Passing the empty rewrite/blocked
+ * collections ({@link NO_REWRITES} / {@link NO_BLOCKED}) reduces this
+ * to a plain detaching deep clone, which is how `metadata` and an
+ * asset's free-form `meta` are copied — their keys are never treated
+ * as asset references.
+ */
 function cloneValue(
 	value: unknown,
 	rewrittenUrls: ReadonlyMap<string, string>,
 	blockedUrls: ReadonlySet<string>,
 	key?: string,
+	seen: WeakMap<object, unknown> = new WeakMap(),
 ): unknown {
-	if (Array.isArray(value)) {
-		return value.map((entry) => cloneValue(entry, rewrittenUrls, blockedUrls));
-	}
-
 	if (typeof value === "string") {
 		if (key === undefined || !isAssetPropKey(key)) {
 			return value;
@@ -553,7 +562,22 @@ function cloneValue(
 		return value;
 	}
 
+	const existing = seen.get(value);
+	if (existing !== undefined) {
+		return existing;
+	}
+
+	if (Array.isArray(value)) {
+		const next: unknown[] = [];
+		seen.set(value, next);
+		for (const entry of value) {
+			next.push(cloneValue(entry, rewrittenUrls, blockedUrls, undefined, seen));
+		}
+		return next;
+	}
+
 	const nextValue: Record<string, unknown> = {};
+	seen.set(value, nextValue);
 	for (const [entryKey, entryValue] of Object.entries(
 		value as Record<string, unknown>,
 	)) {
@@ -562,6 +586,7 @@ function cloneValue(
 			rewrittenUrls,
 			blockedUrls,
 			entryKey,
+			seen,
 		);
 	}
 
@@ -663,36 +688,14 @@ function deepFreeze<T>(value: T): T {
 	return value;
 }
 
+/**
+ * The empty rewrite/blocked collections that turn {@link cloneValue}
+ * into a plain detaching deep clone. Module-level so the reduction
+ * allocates nothing per call.
+ */
+const NO_REWRITES: ReadonlyMap<string, string> = new Map();
+const NO_BLOCKED: ReadonlySet<string> = new Set();
+
 function cloneDetachedObject<T extends object>(value: T): T {
-	return cloneDetachedValue(value, new WeakMap()) as T;
-}
-
-function cloneDetachedValue(
-	value: unknown,
-	seen: WeakMap<object, unknown>,
-): unknown {
-	if (value === null || typeof value !== "object") {
-		return value;
-	}
-
-	const existing = seen.get(value);
-	if (existing !== undefined) {
-		return existing;
-	}
-
-	if (Array.isArray(value)) {
-		const next: unknown[] = [];
-		seen.set(value, next);
-		for (const entry of value) {
-			next.push(cloneDetachedValue(entry, seen));
-		}
-		return next;
-	}
-
-	const next: Record<string, unknown> = {};
-	seen.set(value, next);
-	for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
-		next[key] = cloneDetachedValue(entry, seen);
-	}
-	return next;
+	return cloneValue(value, NO_REWRITES, NO_BLOCKED) as T;
 }
