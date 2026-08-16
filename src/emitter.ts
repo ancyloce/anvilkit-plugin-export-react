@@ -30,6 +30,12 @@ const INDENT = "  ";
  */
 const VALID_JSX_TAG = /^(?:[A-Z][A-Za-z0-9]*|div|style)$/;
 const VALID_JSX_ATTR = /^[A-Za-z_][A-Za-z0-9_-]*$/;
+/**
+ * A slot name becomes the member half of a `<Component.slot>` tag, so it
+ * must be a bare JS identifier — stricter than {@link VALID_JSX_ATTR},
+ * which admits `-`.
+ */
+const VALID_SLOT_NAME = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
 // Threshold (in characters of the inline prop segment) above which props
 // flip from a single-line JSX attribute layout to a multi-line block
@@ -242,11 +248,62 @@ function renderNode(node: PageIRNode, depth: number, ctx: EmitContext): string {
 	}
 
 	const children = node.children as readonly PageIRNode[];
-	const childCode = children
-		.map((child) => renderNode(child, depth + 1, ctx))
-		.join("\n");
+	const childCode = renderChildren(node, children, depth + 1, ctx);
 
 	return `${pad}<${node.type}${propSegment}>\n${childCode}\n${pad}</${node.type}>`;
+}
+
+/**
+ * FR-052 slot emission. A child produced from a Puck slot field carries
+ * that field's key in `node.slot`; such children are wrapped in an
+ * explicit `<Component.slotName>` member tag (PRD 0023 RESOLVED-3) so the
+ * exported vocabulary mirrors Puck's slot model instead of flattening
+ * every region into one anonymous child list. Children with no `slot`
+ * keep rendering directly.
+ *
+ * IR children from one slot are contiguous (the IR is built prop by
+ * prop), so grouping consecutive runs both preserves author order and
+ * keeps this a single pass.
+ */
+function renderChildren(
+	parent: PageIRNode,
+	children: readonly PageIRNode[],
+	depth: number,
+	ctx: EmitContext,
+): string {
+	const pad = indent(depth);
+	const out: string[] = [];
+
+	for (let index = 0; index < children.length; ) {
+		const slot = children[index]?.slot;
+		const group: PageIRNode[] = [];
+		do {
+			group.push(children[index] as PageIRNode);
+			index += 1;
+		} while (index < children.length && children[index]?.slot === slot);
+
+		// Legacy `data.zones` keys are not constrained to identifiers, and
+		// `<Card.my-zone>` would be a syntax error — such a region degrades
+		// to inline children rather than producing unparseable output.
+		const wrap = slot !== undefined && VALID_SLOT_NAME.test(slot);
+		const body = group
+			.map((child) => renderNode(child, wrap ? depth + 1 : depth, ctx))
+			.join("\n");
+
+		if (slot !== undefined && !wrap) {
+			ctx.warnings.push({
+				level: "warn",
+				code: "INVALID_SLOT_NAME",
+				message: `Slot \`${slot}\` is not a valid JSX member name.`,
+				nodeId: parent.id,
+			});
+		}
+
+		const tag = `${parent.type}.${slot}`;
+		out.push(wrap ? `${pad}<${tag}>\n${body}\n${pad}</${tag}>` : body);
+	}
+
+	return out.join("\n");
 }
 
 function renderBody(ir: PageIR, ctx: EmitContext, depth: number): string {
