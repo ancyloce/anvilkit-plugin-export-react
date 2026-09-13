@@ -77,17 +77,17 @@
 		"@anvilkit/typescript-config": "workspace:*",
 		"@anvilkit/vitest-config": "workspace:*",
 		"@puckeditor/core": "^0.23.0",
-		"@rslib/core": "^0.23.2",
-		"@types/node": "^26.2.0",
+		"@rslib/core": "^1.0.0",
+		"@types/node": "^26.4.1",
 		"@typescript-eslint/typescript-estree": "^8.0.0",
-		"esbuild": "^0.28.1",
+		"esbuild": "^0.28.2",
 		"madge": "^8.0.0",
 		"publint": "^0.3.23",
 		"react": "^19.2.8",
 		"typescript": "7.0.2",
-		"vitest": "^4.1.10"
+		"vitest": "^5.0.0"
 	},
 	"dependencies": {
-		"lucide-react": "^1.31.0"
+		"lucide-react": "^1.41.0"
 	}
 }
