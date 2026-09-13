@@ -6,7 +6,7 @@ import type {
 import { FileCode2 } from "lucide-react";
 import { createElement } from "react";
 
-import config from "../meta/config.json";
+import config from "../meta/config.json" with { type: "json" };
 import { createExportReactHeaderAction } from "./actions/header-action.js";
 import { reactFormat } from "./formats/format-definition.js";
 import { EXPORT_REACT_ENTRY } from "./i18n/entry.js";
